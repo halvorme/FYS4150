@@ -1,4 +1,14 @@
 lectures2015.pdf
 *.exe
 *.o
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.gz
+*.bib
 testing/
+snippets.cpp
