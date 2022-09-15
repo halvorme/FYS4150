@@ -70,6 +70,9 @@
 %%
 %% Don't ask me why, I don't know.
 
+\newcommand{\e}{\mathrm{e}}
+
+
 \begin{document}
 
 \title{FYS4150 - Project 1}      % self-explanatory
@@ -84,62 +87,55 @@
 
 \section*{Problem 1}
 
-\subsection*{Problem a}
-Write a solution for problem 1a here.
+We are looking at the one-dimensional Poisson equation 
+\begin{equation}
+    -\dv[2]{u}{x} = f(x),
+    \label{eq:poisson}
+\end{equation}
+on the range $x \in [0,1]$. The boudary conditions are $u(0) = u(1) = 0$ and source term is chosen as 
+\begin{equation}
+    f(x) = 100\, \e^{-10x}.
+\end{equation}
+An exact solution to Equation~\ref{eq:poisson} has the form 
+\begin{equation}
+    u(x) = -\e^{-10x} + C_1 x + C_2.
+\end{equation}
+The boundary condition at $x=0$ gives that $C_2 = 1$, and the condition at $x=1$ then gives that $C_1 = \e^{-10} - 1$. It follows that 
+\begin{equation}
+    u(x) = 1 - (1-\e^{-10})x - \e^{-10x} 
+\end{equation}
+is a solution to Equation~\ref{eq:poisson}, satisfying the given boundary conditions.
 
-\subsection*{Problem b}
-Write a solution for problem 1b here.
 
 \section*{Problem 2}
-We write equations using the LaTeX \texttt{equation} (or \texttt{align}) environments. Here is an equation with numbering
-\begin{equation}\label{eq:newton}
-    \vb{F} = \dv{\vb{p}}{t},
+
+\section*{Problem 3}
+
+To make a discretised version of the Poisson equation, we need to discretise the second derivative. We start out with the definition of the derivative
+\begin{equation}
+    u' = \dv{u}{x} = \lim_{\Delta x \to 0} \frac{u(x+\Delta x) - u(x)}{\Delta x}.
 \end{equation}
-and here is one without numbering:
-\begin{equation*}
-\oint_C \vb{F}\cdot \dd \vb{r} = 0.
-\end{equation*}
-Sometimes it is useful to refer back to a previous equation, like we're demonstrating here for equation \ref{eq:newton}.
+If a function is differentiable at a point $x$ it means that the limit has to be the same if you approach $x$ from above or below. It follows that 
+\begin{equation}
+    u' = \lim_{\Delta x \to 0} \frac{u(x) - u(x-\Delta x)}{\Delta x}
+\end{equation}
+is an equivalent definition. The second derivative can then be defined the following way,
+\begin{equation}
+    \begin{split}
+        u'' = \dv[2]{u}{x} &= \lim_{\Delta x \to 0} \frac{u'(x+\Delta x) - u'(x)}{\Delta x} \\
+            &= \lim_{\Delta x \to 0} \frac{u(x+\Delta x) - 2u(x) + u(x-\Delta x)}{\Delta x^2}.
+    \end{split}
+\end{equation}
 
-We can include figures using the \texttt{figure} environment. Whenever we include a figure or table, we \textit{must} make sure to actually refer to it in the main text, e.g.\ something like this: ``In figure \ref{fig:rel_err} we show \ldots''.
-\begin{figure}%[h!]
-    \centering %Centers the figure
-    \includegraphics[scale=0.55]{imgs/rel_err.pdf} %Imports the figure.
-    \caption{Write a descriptive caption here that explains the content of the figure. Note the font size for the axis labels and ticks --- the size should approximately match the document font size.}
-    \label{fig:rel_err}
-\end{figure}
-Also, note the LaTeX code we used to get correct quotation marks in the previous sentence. (Simply using the \texttt{"} key on your keyboard will give the wrong result.) Figures should preferably be vector graphics (e.g.\ a \texttt{.pdf} file) rather than raster graphics (e.g.\ a \texttt{.png} file).
+Now we would like to discretise this expression. We start by discretising the $x$-axis. The line segment $[1,0]$ is replaced by the set with $N+1$ elements, 
+\begin{equation}
+    \{x_i = i h \mid i\in\{0,1, \dots, N\},\ h = \frac{1}{N}\}.
+\end{equation}
+The distance between each point is given by $h$. We notice that $x_i + nh = x_{i+n}$ for any integer $n$. The function $u(x)$ is now replaced by the set
+\begin{equation}
+    v_i = u(x_i),
+\end{equation}
+and the boundary conditions tells us that $v_0 = v_N = 0$.
 
-By the way, don't worry too much about where LaTeX decides to place your figures and tables --- LaTeX knows more than we do about proper document layout. As long as you label all your figures and tables and refer to them in the text, it's all good. Of course, in some cases it can be worth trying to force a specific placement, to avoid the figure/table appearing many pages away from the main text discussing it, but this isn't something you should spend time on until the very end of the writing process.
-
-
-Next up is a table, created using the \texttt{table} and \texttt{tabular} environments. We refer to it by table \ref{tab:output_table}.
-\begin{table}%[h!]
-    \centering
-    \caption{Write a descriptive caption here, explaining the content of your table.}
-    \begin{tabular}{c@{\hspace{1cm}} c}
-        \hline
-        Number of points & Output \\
-        \hline
-        10 &  0.3086\\
-        100 &  0.2550\\
-        \hline
-    \end{tabular}\label{tab:output_table}
-\end{table}
-
-Finally, we can list algorithms by using the \texttt{algorithm} environment, as demonstrated here for algorithm \ref{algo:midpoint_rule}.
-\begin{algorithm}[H]
-    \caption{Some algorithm}\label{algo:midpoint_rule}
-    \begin{algorithmic}
-        \State Some maths, e.g $f(x) = x^2$.  \Comment{Here's a comment}
-        \For{$i = 0, 1, ..., n-1$}
-        \State Do something here
-        \EndFor
-        \While{Some condition}
-        \State Do something more here
-        \EndWhile
-        \State Maybe even some more math here, e.g $\int_0^1 f(x) \dd x$
-    \end{algorithmic}
-\end{algorithm}
 
 \end{document}

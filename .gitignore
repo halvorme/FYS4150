@@ -3,6 +3,8 @@ snippets.cpp
 lectures2015.pdf
 *.pdf
 
+.DS_Store
+
 *.exe
 *.o
 *.aux
