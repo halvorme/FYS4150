@@ -1,4 +1,8 @@
+testing/
+snippets.cpp
 lectures2015.pdf
+*.pdf
+
 *.exe
 *.o
 *.aux
@@ -10,5 +14,3 @@ lectures2015.pdf
 *.out
 *.gz
 *.bib
-testing/
-snippets.cpp
