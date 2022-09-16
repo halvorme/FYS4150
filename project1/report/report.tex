@@ -1,4 +1,4 @@
-\documentclass[english,notitlepage,aps,pra,10pt]{revtex4-1}  % defines the basic parameters of the document
+\documentclass[english,notitlepage,aps,pra,10pt]{revtex4-2}
 %For preview: skriv i terminal: latexmk -pdf -pvc filnavn
 
 % if you want a single-column, remove reprint
@@ -226,6 +226,7 @@ Stacking all these equations in one matrix we get
         f_{N-2} \\
         f_{N-1}
     \end{pmatrix}.
+    \label{eq:discPoissonMat}
 \end{equation}
 By discretising the Poisson equation we could rewrite it as matrix equation with the form 
 \begin{equation}
@@ -261,10 +262,11 @@ To solve Equation~\ref{eq:AvEqg} we simply us Gaussian elimination. The algorith
 
         \Comment Forward substitution
         \State $b'_1 = b_1$
+        \State $g'_1 = g_1$
         \For{$i = 1, 2, \dots, n-1$}                \Comment $n-1$ iterations
             \State $d = a_i/b_i$                    \Comment 1 FLOP
             \State $b'_{i+1} = b_{i+1} - d\, c_i$   \Comment 2 FLOPs 
-            \State $g'_{i+1} = g_{i+1} - d\, g_i$   \Comment 2 FLOPs 
+            \State $g'_{i+1} = g_{i+1} - d\, g'_i$  \Comment 2 FLOPs 
         \EndFor
         \Comment Backward substitution
         \State $v_n = g'_n/b'_n$                    \Comment 1 FLOP 
@@ -278,18 +280,58 @@ To solve Equation~\ref{eq:AvEqg} we simply us Gaussian elimination. The algorith
 
 In the right coloumn of Algorithm~\ref{algo:triDiagGauss} we have listed the number of floating-point operations (FLOPs) needed for each step. We see that there are $5(n-1)$ FLOPs needed for the forward substitution and $3(n-1)+1$ for backwards substitution. When we sum these, we find that the algorithm needs
 \begin{equation}
-    8n-7 \textrm{ FLOPs}.
+    (8n-7) \textrm{ FLOPs}.
 \end{equation} 
 We note that the number of FLOPs depends linearly on $n$.
 
 
+\section*{Problem 7}
 
 
 
+\section*{Problem 8}
 
 
+\section*{Problem 9}
+
+\subsection*{Problem a \& b}
+
+The algorithm presented in Problem 6 can be specialised for the purpose of the discretised Poisson equation (Eq.~\ref{eq:discPoissonMat}). As we know that $a_i = c_i = -1$ and $b_i = 2$, Algorithm~\ref{algo:triDiagGauss} can be simplified a bit. The result is shown in Algorithm~\ref{algo:PoissonGauss}. The specialised algorithm has
+\begin{equation}
+    (6n-5) \textrm{ FLOPs}.
+\end{equation}
 
 
+\begin{algorithm}[H]
+    \caption{Gaussian elimination of Poisson matrix}\label{algo:PoissonGauss}
+    \begin{algorithmic}
+        \State Initialise $a = c = -1$, $b = 2$
+        \State Initialise $\bv{g}$ with its given values
+        \State Initialise new vectors $\bv{v}$, $\bv{b}'$ and $\bv{g}'$ of length $n$ 
+
+        \Comment Forward substitution
+        \State $b'_1 = 2$
+        \State $g'_1 = g_1$
+        \For{$i = 1, 2, \dots, n-1$}                        \Comment $(n-1)$ iterations
+            \State $b'_{i+1} = 2 - 1/b'_i$                  \Comment 2 FLOPs 
+            \State $g'_{i+1} = g_{i+1} + g'_{i}/b'_{i}$     \Comment 2 FLOPs 
+        \EndFor
+        \Comment Backward substitution
+        \State $v_n = g'_n/b'_n$                            \Comment 1 FLOP 
+        \For{$i = 1, 2, \dots, n-1$}                        \Comment $(n-1)$ iterations
+            \State $v_{n-i} = (g'_{n-i} + v_{n-i+1})/b'_{n-i}$  \Comment 2 FLOPs
+        \EndFor
+    \end{algorithmic}
+\end{algorithm}
+
+% It is possible to reduce the number of FLOPs even more by noticing that the expression for $b'_i$ creates the sequence 
+% \begin{equation}
+%     \bv{b}' = \{2, \frac{3}{2}, \frac{4}{3}, \frac{5}{4}, \dots, \frac{n+1}{n}\}.
+% \end{equation}
+% As a consequence, we can write 
+% \begin{equation}
+%     b'_{i+1} = \frac{i+2}{i+1}
+% \end{equation}
 
 
 
