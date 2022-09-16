@@ -2,6 +2,7 @@ testing/
 snippets.cpp
 lectures2015.pdf
 *.pdf
+*.txt
 
 .DS_Store
 

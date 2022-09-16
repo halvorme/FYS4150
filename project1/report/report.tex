@@ -12,6 +12,7 @@
 
 \usepackage{physics,amssymb}  % mathematical symbols (physics imports amsmath)
 \usepackage{amsmath}
+% \usepackage{amssymb}
 \usepackage{graphicx}         % include graphics such as plots
 \usepackage{xcolor}           % set colors
 \usepackage{hyperref}         % automagic cross-referencing (this is GODLIKE)
@@ -109,6 +110,16 @@ is a solution to Equation~\ref{eq:poisson}, satisfying the given boundary condit
 
 
 \section*{Problem 2}
+
+The plot of the exact solution is seen in Figure~\ref{fig:uExact}. The generating code is found in the repository linked at the top of the document.
+
+\begin{figure}%[h!]
+    \begin{center}
+        \includegraphics{../imgs/u_exact.pdf} 
+        \caption{The plot shows the exact solution to the Poisson equation (Eq.~\ref{eq:poisson}), with the source term $f(x) = 100 \e^{-10x}$, and boundary conditions $u(0)=u(1)=0$.}
+        \label{fig:uExact}     
+    \end{center}
+\end{figure}
 
 \section*{Problem 3}
 
