@@ -174,7 +174,7 @@ The discretised Poisson equation (Eq.~\ref{eq:discPoisson}) gives us a set of $N
     \end{pmatrix}
     = h^2 f_i.
 \end{equation} 
-For the first and last equation we can use the boundary conditions and they then simplify to  
+For the first and last equation we can use the boundary conditions and simplify them as  
 \begin{equation}
     \begin{split}
         \begin{pmatrix}
@@ -235,9 +235,63 @@ where $A$ is a tridiagonal matrix, $\bv{v}$ is a vector of the unknown $v_i$'s a
 
 
 \section*{Problem 5}
-The vector $\bv{v}$, as defined above, includes only the subset of $v$ which is unknown. The complete solution, $\bv{v}^*$ with length $m$, also includes the two endpoints, $v_0$ and $v_N$, which are determined by the boundary conditions. That means
+
+The vector $\bv{v}$, as defined above, includes only the subset of internal points of $v$, which are unknown. The complete solution $\bv{v}^*$, with length $m$, also includes the two endpoints, $v_0$ and $v_N$, which are determined by the boundary conditions. That means
 \begin{equation}
     m = n + 2 = N + 1.
 \end{equation}
+
+
+\section*{Problem 6}
+\subsection*{Problem a}
+We want an algorithm to solve the general matrix equation 
+\begin{equation}
+    A \bv{v} = \bv{g},
+    \label{eq:AvEqg}
+\end{equation}
+where $A$ is a $n \times n$ tridiagonal matrix. We denote the subdiagonal, main diagonal and superdiagonal as $\bv{a}$, $\bv{b}$ and $\bv{c}$, respectively. The vectors $\bv{v}$, $\bv{g}$ and $\bv{b}$ has length $n$, and the off-diagonal vectors $\bv{a}$ and $\bv{c}$ has length $n-1$. 
+
+To solve Equation~\ref{eq:AvEqg} we simply us Gaussian elimination. The algorithm is separated in forward and backward substitution. In the forward substitution, the subdiagonal $\bv{a}$ is eliminated, while $\bv{b}$ and $\bv{g}$ are modified. In the backward substitution, we solve each row for $v_i$, one after the other. The exact steps are presented in Algorithm~\ref{algo:triDiagGauss}.
+
+\begin{algorithm}[H]
+    \caption{Gaussian elimination of tridiagonal matrix}\label{algo:triDiagGauss}
+    \begin{algorithmic}
+        \State Initialise $\bv{a}$, $\bv{b}$, $\bv{c}$ and $\bv{g}$ with their given values
+        \State Initialise new vectors $\bv{v}$, $\bv{b}'$ and $\bv{g}'$ of length $n$ 
+
+        \Comment Forward substitution
+        \State $b'_1 = b_1$
+        \For{$i = 1, 2, \dots, n-1$}                \Comment $n-1$ iterations
+            \State $d = a_i/b_i$                    \Comment 1 FLOP
+            \State $b'_{i+1} = b_{i+1} - d\, c_i$   \Comment 2 FLOPs 
+            \State $g'_{i+1} = g_{i+1} - d\, g_i$   \Comment 2 FLOPs 
+        \EndFor
+        \Comment Backward substitution
+        \State $v_n = g'_n/b'_n$                    \Comment 1 FLOP 
+        \For{$i = 1, 2, \dots, n-1$}                \Comment $n-1$ iterations
+            \State $v_{n-i} = (g'_{n-i} - c_{n-i} v_{n-i+1})/b'_{n-i}$  \Comment 3 FLOPs
+        \EndFor
+    \end{algorithmic}
+\end{algorithm}
+
+\subsection*{Problem b}
+
+In the right coloumn of Algorithm~\ref{algo:triDiagGauss} we have listed the number of floating-point operations (FLOPs) needed for each step. We see that there are $5(n-1)$ FLOPs needed for the forward substitution and $3(n-1)+1$ for backwards substitution. When we sum these, we find that the algorithm needs
+\begin{equation}
+    8n-7 \textrm{ FLOPs}.
+\end{equation} 
+We note that the number of FLOPs depends linearly on $n$.
+
+
+
+
+
+
+
+
+
+
+
+
 
 \end{document}
