@@ -71,6 +71,7 @@
 %% Don't ask me why, I don't know.
 
 \newcommand{\e}{\mathrm{e}}
+\newcommand{\bv}[1]{\mathbf{#1}}
 
 
 \begin{document}
@@ -113,21 +114,23 @@ is a solution to Equation~\ref{eq:poisson}, satisfying the given boundary condit
 
 To make a discretised version of the Poisson equation, we need to discretise the second derivative. We start out with the definition of the derivative
 \begin{equation}
-    u' = \dv{u}{x} = \lim_{\Delta x \to 0} \frac{u(x+\Delta x) - u(x)}{\Delta x}.
+    u'(x) = \dv{u}{x} = \lim_{\Delta x \to 0} \frac{u(x+\Delta x) - u(x)}{\Delta x}.
 \end{equation}
 If a function is differentiable at a point $x$ it means that the limit has to be the same if you approach $x$ from above or below. It follows that 
 \begin{equation}
-    u' = \lim_{\Delta x \to 0} \frac{u(x) - u(x-\Delta x)}{\Delta x}
+    u'(x) = \lim_{\Delta x \to 0} \frac{u(x) - u(x-\Delta x)}{\Delta x}
 \end{equation}
 is an equivalent definition. The second derivative can then be defined the following way,
 \begin{equation}
     \begin{split}
-        u'' = \dv[2]{u}{x} &= \lim_{\Delta x \to 0} \frac{u'(x+\Delta x) - u'(x)}{\Delta x} \\
+        u''(x) = \dv[2]{u}{x} &= \lim_{\Delta x \to 0} \frac{u'(x+\Delta x) - u'(x)}{\Delta x} \\
             &= \lim_{\Delta x \to 0} \frac{u(x+\Delta x) - 2u(x) + u(x-\Delta x)}{\Delta x^2}.
     \end{split}
+    \label{eq:secDer}
 \end{equation}
+When we discretise the $x$-axis it will no longer be possible to take the limit $\Delta x \to 0$. The smallest possible value is $\Delta x = h$, where $h$ is the stepsize of the discretisation. We will than have to find an approximation for $u''(x)$. By Taylor expanding 
 
-Now we would like to discretise this expression. We start by discretising the $x$-axis. The line segment $[1,0]$ is replaced by the set with $N+1$ elements, 
+We would now like to discretise this expression. We start by discretising the $x$-axis. The line segment $[1,0]$ is replaced by the set with $N+1$ elements, 
 \begin{equation}
     \{x_i = i h \mid i\in\{0,1, \dots, N\},\ h = \frac{1}{N}\}.
 \end{equation}
@@ -135,7 +138,106 @@ The distance between each point is given by $h$. We notice that $x_i + nh = x_{i
 \begin{equation}
     v_i = u(x_i),
 \end{equation}
-and the boundary conditions tells us that $v_0 = v_N = 0$.
+where we choose denote the solution to the discretised equation as $v$. The boundary conditions tells us that $v_0 = v_N = 0$. For the source term we will simply use $f_i = f(x_i)$. 
 
+When the function $u(x)$ is discretised, we can't take the limit $\Delta x \to 0$ any more. The best we can do is $\Delta x \to h$. We than has to work with an approximation to Equation~\ref{eq:secDer}. By Taylor expanding 
+\begin{equation}
+    u(x \pm h) = u(x) \pm h u'(x) + \frac{1}{2} h^2 u''(x) \pm \frac{1}{6} h^3 u^{(3)}(x) + \frac{1}{24} h^4 u^{(4)} + \mathcal{O}(h^5)
+\end{equation}
+we find that 
+\begin{equation}
+    u''(x) = \frac{u(x+h) - 2u(x) + u(x-h)}{h^2} + \mathcal{O}(h^2).
+\end{equation}
+Discarding the terms of $\mathcal{O}(h^2)$ and discretising the remainding expression we get
+\begin{equation}
+    v_i'' = \frac{1}{h^2}(v_{i+1} - 2v_i + v_{i-1}).
+\end{equation}
+
+In the end, the discretised Poisson equation (Eq.~\ref{eq:poisson}) can be written as
+\begin{equation}
+    -v_{i-1} + 2v_i - v_{i+1} = h^2 f_i,
+    \label{eq:discPoisson}
+\end{equation} 
+where $i \in \{1,\dots, N-1\}$.
+
+\section*{Problem 4}
+
+The discretised Poisson equation (Eq.~\ref{eq:discPoisson}) gives us a set of $N-1$ equations, with $N-1$ unknowns, as $v_0$ and $v_N$ are set by the boundary conditions. We can write each of these equation on matrix form
+\begin{equation}
+    \begin{pmatrix}
+        -1 & 2 & -1
+    \end{pmatrix}
+    \begin{pmatrix}
+        v_{i-1} \\
+        v_i \\
+        v_{i+1}
+    \end{pmatrix}
+    = h^2 f_i.
+\end{equation} 
+For the first and last equation we can use the boundary conditions and they then simplify to  
+\begin{equation}
+    \begin{split}
+        \begin{pmatrix}
+            2 & -1
+        \end{pmatrix}
+        \begin{pmatrix}
+            v_1 \\
+            v_2
+        \end{pmatrix}
+        &= h^2 f_1, \\
+        \begin{pmatrix}
+            -1 & 2
+        \end{pmatrix}
+        \begin{pmatrix}
+            v_{N-2} \\
+            v_{N-1}
+        \end{pmatrix}
+        &= h^2 f_{N-1}.
+    \end{split}
+\end{equation}
+Stacking all these equations in one matrix we get 
+\begin{equation}
+    \begin{pmatrix}
+         2 & -1 &  0 &  0 & \cdots &  0 &  0 \\
+        -1 &  2 & -1 &  0 & \cdots &  0 &  0 \\
+         0 & -1 &  2 & -1 & \cdots &  0 &  0 \\
+         0 &  0 & -1 &  2 & \cdots &  0 &  0 \\
+        \vdots & \vdots & \vdots & \vdots & \ddots & \vdots  & \vdots\\
+         0 &  0 &  0 &  0 & \cdots &  2 & -1 \\
+         0 &  0 &  0 &  0 & \cdots & -1 &  2 \\
+    \end{pmatrix}
+    \begin{pmatrix}
+        v_1 \\
+        v_2 \\
+        v_3 \\
+        v_4 \\
+        \vdots \\
+        v_{N-2} \\
+        v_{N-1}
+    \end{pmatrix}
+    =
+    h^2
+    \begin{pmatrix}
+        f_1 \\
+        f_2 \\
+        f_3 \\
+        f_4 \\
+        \vdots \\
+        f_{N-2} \\
+        f_{N-1}
+    \end{pmatrix}.
+\end{equation}
+By discretising the Poisson equation we could rewrite it as matrix equation with the form 
+\begin{equation}
+    A \bv{v} = \bv{g},
+\end{equation}
+where $A$ is a tridiagonal matrix, $\bv{v}$ is a vector of the unknown $v_i$'s and $\bv{g}$ encodes the information of the source term, but is scaled by a factor $h^2$. 
+
+
+\section*{Problem 5}
+The vector $\bv{v}$, as defined above, includes only the subset of $v$ which is unknown. The complete solution, $\bv{v}^*$ with length $m$, also includes the two endpoints, $v_0$ and $v_N$, which are determined by the boundary conditions. That means
+\begin{equation}
+    m = n + 2 = N + 1.
+\end{equation}
 
 \end{document}
