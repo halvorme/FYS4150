@@ -13,7 +13,8 @@ int main()
 
 
 	filename = folder + "u_" + std::to_string(n_steps) + ".txt";
-	uExact(n_steps, x_min, x_max, filename, prec);
+	arma::mat xu = uExact(n_steps, x_min, x_max, prec);
+	toFile(xu, filename, prec);
 
 	n_steps = 10;
 	for (int i = 1; i < 5; i++)

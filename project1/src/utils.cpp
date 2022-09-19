@@ -6,9 +6,9 @@
 #include "utils.hpp"
 
 // Write two vectors to file
-int toFile(arma::vec x, arma::vec y, std::string filename, int prec) 
+int toFile(arma::mat xy, std::string filename, int prec) 
 {
-	int n = arma::size(x)[0];
+	int n = arma::size(xy.col(0))[0];
 
 	// Open file
 	std::ofstream ofile;
@@ -23,15 +23,14 @@ int toFile(arma::vec x, arma::vec y, std::string filename, int prec)
 			  << std::endl;
 	// Write vectors to file in scientific format
 	for (int i = 0; i < n; i++){
-		ofile << std::setw(width) << std::setprecision(prec) << std::scientific << x(i)
-			  << std::setw(width) << std::setprecision(prec) << std::scientific << y(i)
+		ofile << std::setw(width) << std::setprecision(prec) << std::scientific << xy(i,0)
+			  << std::setw(width) << std::setprecision(prec) << std::scientific << xy(i,1)
 			  << std::endl;
 	}
 	// Write final values to file
 	ofile << std::setw(width) << std::setprecision(prec) << std::scientific << 1.
 			  << std::setw(width) << std::setprecision(prec) << std::scientific << 0.
 			  << std::endl;
-
 
 	// Close file
 	ofile.close();

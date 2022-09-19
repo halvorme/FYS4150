@@ -5,7 +5,7 @@
 #include <cmath>
 
 // Calculates the exact solution u(x)
-int uExact(int n_steps, double x_min, double x_max, std::string filename, int prec);
+arma::mat uExact(int n_steps, double x_min, double x_max, int prec);
 
 
 // Solves the Poisson equation and prints the solution to file
