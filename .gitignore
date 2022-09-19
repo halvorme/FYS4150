@@ -5,6 +5,7 @@ lectures2015.pdf
 *.txt
 
 .DS_Store
+.vscode
 
 *.exe
 *.o

@@ -115,7 +115,7 @@ The plot of the exact solution is seen in Figure~\ref{fig:uExact}. The generatin
 
 \begin{figure}%[h!]
     \begin{center}
-        \includegraphics{../imgs/u_exact.pdf} 
+        \includegraphics{../imgs/u_exact.pdf}
         \caption{The plot shows the exact solution to the Poisson equation (Eq.~\ref{eq:poisson}), with the source term $f(x) = 100 \e^{-10x}$, and boundary conditions $u(0)=u(1)=0$.}
         \label{fig:uExact}     
     \end{center}
@@ -266,23 +266,21 @@ where $A$ is a $n \times n$ tridiagonal matrix. We denote the subdiagonal, main 
 To solve Equation~\ref{eq:AvEqg} we simply us Gaussian elimination. The algorithm is separated in forward and backward substitution. In the forward substitution, the subdiagonal $\bv{a}$ is eliminated, while $\bv{b}$ and $\bv{g}$ are modified. In the backward substitution, we solve each row for $v_i$, one after the other. The exact steps are presented in Algorithm~\ref{algo:triDiagGauss}.
 
 \begin{algorithm}[H]
-    \caption{Gaussian elimination of tridiagonal matrix}\label{algo:triDiagGauss}
+    \caption{Gaussian elimination of a tridiagonal matrix}\label{algo:triDiagGauss}
     \begin{algorithmic}
         \State Initialise $\bv{a}$, $\bv{b}$, $\bv{c}$ and $\bv{g}$ with their given values
-        \State Initialise new vectors $\bv{v}$, $\bv{b}'$ and $\bv{g}'$ of length $n$ 
+        \State Initialise new vector $\bv{v}$ of length $n$ 
 
         \Comment Forward substitution
-        \State $b'_1 = b_1$
-        \State $g'_1 = g_1$
-        \For{$i = 1, 2, \dots, n-1$}                \Comment $n-1$ iterations
-            \State $d = a_i/b_i$                    \Comment 1 FLOP
-            \State $b'_{i+1} = b_{i+1} - d\, c_i$   \Comment 2 FLOPs 
-            \State $g'_{i+1} = g_{i+1} - d\, g'_i$  \Comment 2 FLOPs 
+        \For{$i = 1, 2, \dots, n-1$}                    \Comment $n-1$ iterations
+            \State $d = a_i/b_i$                        \Comment 1 FLOP
+            \State $b_{i+1} = b_{i+1} - d\, c_i$        \Comment 2 FLOPs 
+            \State $g_{i+1} = g_{i+1} - d\, g_i$        \Comment 2 FLOPs 
         \EndFor
         \Comment Backward substitution
-        \State $v_n = g'_n/b'_n$                    \Comment 1 FLOP 
-        \For{$i = 1, 2, \dots, n-1$}                \Comment $n-1$ iterations
-            \State $v_{n-i} = (g'_{n-i} - c_{n-i} v_{n-i+1})/b'_{n-i}$  \Comment 3 FLOPs
+        \State $v_n = g_n/b_n$                          \Comment 1 FLOP 
+        \For{$i = 1, 2, \dots, n-1$}                    \Comment $n-1$ iterations
+            \State $v_{n-i} = (g_{n-i} - c_{n-i} v_{n-i+1})/b_{n-i}$  \Comment 3 FLOPs
         \EndFor
     \end{algorithmic}
 \end{algorithm}
@@ -298,6 +296,15 @@ We note that the number of FLOPs depends linearly on $n$.
 
 \section*{Problem 7}
 
+The alogrithm is implemented in the function \verb+genAlgo+, found in the file \verb+algo.cpp+ in the repo. The resulting plot is found in Figure~\ref{fig:v}.
+
+\begin{figure}%[h!]
+    \begin{center}
+        \includegraphics{../imgs/v.pdf}
+        \caption{The plot shows the exact solution $u(x)$ to the Poisson equation and the numerical approximation $v(x)$ for three different stepsizes.}
+        \label{fig:v}
+    \end{center}
+\end{figure}
 
 
 \section*{Problem 8}
@@ -312,25 +319,22 @@ The algorithm presented in Problem 6 can be specialised for the purpose of the d
     (6n-5) \textrm{ FLOPs}.
 \end{equation}
 
-
 \begin{algorithm}[H]
     \caption{Gaussian elimination of Poisson matrix}\label{algo:PoissonGauss}
     \begin{algorithmic}
         \State Initialise $a = c = -1$, $b = 2$
         \State Initialise $\bv{g}$ with its given values
-        \State Initialise new vectors $\bv{v}$, $\bv{b}'$ and $\bv{g}'$ of length $n$ 
+        \State Initialise new vector $\bv{v}$ of length $n$ 
 
         \Comment Forward substitution
-        \State $b'_1 = 2$
-        \State $g'_1 = g_1$
         \For{$i = 1, 2, \dots, n-1$}                        \Comment $(n-1)$ iterations
-            \State $b'_{i+1} = 2 - 1/b'_i$                  \Comment 2 FLOPs 
-            \State $g'_{i+1} = g_{i+1} + g'_{i}/b'_{i}$     \Comment 2 FLOPs 
+            \State $b_{i+1} = 2 - 1/b_i$                    \Comment 2 FLOPs 
+            \State $g_{i+1} = g_{i+1} + g_{i}/b_{i}$        \Comment 2 FLOPs 
         \EndFor
         \Comment Backward substitution
-        \State $v_n = g'_n/b'_n$                            \Comment 1 FLOP 
+        \State $v_n = g_n/b_n$                              \Comment 1 FLOP 
         \For{$i = 1, 2, \dots, n-1$}                        \Comment $(n-1)$ iterations
-            \State $v_{n-i} = (g'_{n-i} + v_{n-i+1})/b'_{n-i}$  \Comment 2 FLOPs
+            \State $v_{n-i} = (g_{n-i} + v_{n-i+1})/b_{n-i}$  \Comment 2 FLOPs
         \EndFor
     \end{algorithmic}
 \end{algorithm}
@@ -344,7 +348,7 @@ The algorithm presented in Problem 6 can be specialised for the purpose of the d
 %     b'_{i+1} = \frac{i+2}{i+1}
 % \end{equation}
 
-
+\section*{Problem 10}
 
 
 \end{document}

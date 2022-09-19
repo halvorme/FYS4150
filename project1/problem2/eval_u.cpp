@@ -1,46 +1,53 @@
-#include <iostream>
 #include <string>
-#include <fstream>
 #include <cmath>
-#include <iomanip>
+#include <armadillo> // compile with flag -larmadillo
 
-#include <typeinfo>
+#include "utils.hpp"
 
-double u(double x);
+double func(double x);
+arma::vec ux(int n, double h, arma::vec x);
+int uExact(int n_steps, double x_min, double x_max, std::string filename, int prec);
 
-int main(){
-    std::string filename = "x_u_exact.txt";
+int main()
+{
+    std::string filename;
+    int n_steps = 10000;
+    int prec = 8;
 
-    std::ofstream ofile;
-    ofile.open(filename);
+    double x_min = 0.;
+    double x_max = 1.;
 
-    double x_min = 0.0;
-    double x_max = 1.0;
-    int n_steps = 100;
-    double h = (x_max - x_min) / n_steps;
-
-    int width = 11;
-    int prec = 3;
-
-    double x = x_min;
-    double y = u(x);
-
-    for (int i = 0; i <= n_steps; i++){
-        // Write a line with the current x and y values (nicely formatted) to file
-        ofile << std::setw(width) << std::setprecision(prec) << std::scientific << x
-              << std::setw(width) << std::setprecision(prec) << std::scientific << y
-              << std::endl;
-
-        // Update x and y values
-        x += h;
-        y = u(x);
-    }
-
-    ofile.close();
+	filename = "u_" + std::to_string(n_steps) + ".txt";
+	uExact(n_steps, x_min, x_max, filename, prec);
 
     return 0;
 }
 
-double u(double x){
+int uExact(int n_steps, double x_min, double x_max, std::string filename, int prec)
+{
+    int n = n_steps-1;
+    double h = (x_max - x_min) / n_steps;
+
+	// Initialise the x-axis (does not include endpoints)
+	arma::vec x = xAxis(n_steps, x_min, h);
+
+    arma::vec u = ux(n,h,x);
+
+    toFile(x, u, filename, prec);
+
+    return 0;
+}
+
+arma::vec ux(int n, double h, arma::vec x)
+{
+	arma::vec u = arma::vec(n);
+	for (int i = 0; i < n; i++) {
+		u(i) = func(x(i));
+	}
+	return u;
+}
+
+
+double func(double x){
     return 1. - (1.-std::exp(-10))*x - std::exp(-10.*x);
 }
