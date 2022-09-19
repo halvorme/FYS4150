@@ -1,3 +1,4 @@
+template/
 testing/
 snippets.cpp
 lectures2015.pdf
@@ -20,3 +21,5 @@ lectures2015.pdf
 *.bib
 project1/problem2/
 project1/problem7/
+project1/report/
+!project1/report.pdf
