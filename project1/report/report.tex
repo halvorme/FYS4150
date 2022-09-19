@@ -121,6 +121,7 @@ The plot of the exact solution is seen in Figure~\ref{fig:uExact}. The generatin
     \end{center}
 \end{figure}
 
+
 \section*{Problem 3}
 
 To make a discretised version of the Poisson equation, we need to discretise the second derivative. We start out with the definition of the derivative
@@ -158,6 +159,7 @@ When the function $u(x)$ is discretised, we can't take the limit $\Delta x \to 0
 we find that 
 \begin{equation}
     u''(x) = \frac{u(x+h) - 2u(x) + u(x-h)}{h^2} + \mathcal{O}(h^2).
+    \label{eq:approxDeriv}
 \end{equation}
 Discarding the terms of $\mathcal{O}(h^2)$ and discretising the remainding expression we get
 \begin{equation}
@@ -170,6 +172,7 @@ In the end, the discretised Poisson equation (Eq.~\ref{eq:poisson}) can be writt
     \label{eq:discPoisson}
 \end{equation} 
 where $i \in \{1,\dots, N-1\}$.
+
 
 \section*{Problem 4}
 
@@ -290,6 +293,7 @@ To solve Equation~\ref{eq:AvEqg} we simply us Gaussian elimination. The algorith
 In the right coloumn of Algorithm~\ref{algo:triDiagGauss} we have listed the number of floating-point operations (FLOPs) needed for each step. We see that there are $5(n-1)$ FLOPs needed for the forward substitution and $3(n-1)+1$ for backwards substitution. When we sum these, we find that the algorithm needs
 \begin{equation}
     (8n-7) \textrm{ FLOPs}.
+    \label{eq:genFlop}
 \end{equation} 
 We note that the number of FLOPs depends linearly on $n$.
 
@@ -309,24 +313,67 @@ The alogrithm is implemented in the function \verb+genAlgo+, found in the file \
 
 \section*{Problem 8}
 
+The plots of the absolute error 
+\begin{equation}
+    \Delta_i = \abs{u_i - v_i}
+\end{equation}
+and relative error 
+\begin{equation}
+    \epsilon_i = \abs{\frac{u_i - v_i}{v_i}}
+\end{equation}
+of the numerical approximation $v(x)$ is shown in Figures~\ref{fig:abs_err} and \ref{fig:rel_err}, respectively. We notice that the errors first decrease with the stepsize $h\sim 1/n_\mathrm{steps}$, until it is around $10^{-4}-10^{-5}$. When we reduce the stepsize further, we notice that the errors increase again. This is evident when we compare the maximal relative error, $\max(\epsilon_i)$, for different number of steps in Table~\ref{tab:max_eps}. The initial improvement in precision comes from the fact that the discretised algorithm gets more precise for smaller stepsizes, as shown in Equation~\ref{eq:approxDeriv}. The problem we face for smaller stepsizes comes from the fact that the computer cannot deal with numbers of arbitrary precision. In the last step of the algorithm, we add two numbers, $v_i$ and $g_i$, which are of widely different magnitude ($g_i$ is of order $h^2$). So as $h$ gets smaller, the presicion of $g_i$ is reduced, when added to $v_i$.
+
+\begin{figure}%[h!]
+    \begin{center}
+        \includegraphics{../imgs/abs_err.pdf}
+        \caption{The plot shows the absolute error of the numerical approximation $v(x)$ for different numbers of steps.}
+        \label{fig:abs_err}
+    \end{center}
+\end{figure}
+
+\begin{figure}%[h!]
+    \begin{center}
+        \includegraphics{../imgs/rel_err.pdf}
+        \caption{The plot shows the relative error of the numerical approximation $v(x)$ for different numbers of steps.}
+        \label{fig:rel_err}
+    \end{center}
+\end{figure}
+
+\begin{table}%[h!]
+    \centering
+    \caption{The table shows the maximal relative error in $v(x_i)$, $\max(\epsilon_i)$, for different number of steps, $n_\mathrm{steps}$, used in the numerical approximation.}
+    \begin{tabular}{c@{\hspace{1cm}} c}
+        \hline
+            $n_\mathrm{steps}$ & $\max(\epsilon_i)$ \\
+        \hline
+            $10$   & $3.3\cdot 10^{-1}$ \\
+            $10^2$ & $4.6\cdot 10^{-2}$ \\
+            $10^3$ & $6.2\cdot 10^{-3}$ \\
+            $10^4$ & $8.5\cdot 10^{-4}$ \\
+            $10^5$ & $1.2\cdot 10^{-3}$ \\
+            $10^6$ & $6.4\cdot 10^{-3}$ \\
+            $10^7$ & $7.4\cdot 10^{-2}$ \\
+        \hline
+    \end{tabular}\label{tab:max_eps}
+\end{table}
+
 
 \section*{Problem 9}
-
-\subsection*{Problem a \& b}
 
 The algorithm presented in Problem 6 can be specialised for the purpose of the discretised Poisson equation (Eq.~\ref{eq:discPoissonMat}). As we know that $a_i = c_i = -1$ and $b_i = 2$, Algorithm~\ref{algo:triDiagGauss} can be simplified a bit. The result is shown in Algorithm~\ref{algo:PoissonGauss}. The specialised algorithm has
 \begin{equation}
     (6n-5) \textrm{ FLOPs}.
+    \label{eq:specFlop}
 \end{equation}
-
+It is implemented as the function \verb+specAlgo+ in \verb+algo.cpp+. 
 \begin{algorithm}[H]
     \caption{Gaussian elimination of Poisson matrix}\label{algo:PoissonGauss}
     \begin{algorithmic}
-        \State Initialise $a = c = -1$, $b = 2$
         \State Initialise $\bv{g}$ with its given values
-        \State Initialise new vector $\bv{v}$ of length $n$ 
+        \State Initialise new vectors $\bv{v}$ and $\bv{b}$ of length $n$ 
 
         \Comment Forward substitution
+        \State $b_1 = 2$
         \For{$i = 1, 2, \dots, n-1$}                        \Comment $(n-1)$ iterations
             \State $b_{i+1} = 2 - 1/b_i$                    \Comment 2 FLOPs 
             \State $g_{i+1} = g_{i+1} + g_{i}/b_{i}$        \Comment 2 FLOPs 
@@ -339,16 +386,33 @@ The algorithm presented in Problem 6 can be specialised for the purpose of the d
     \end{algorithmic}
 \end{algorithm}
 
-% It is possible to reduce the number of FLOPs even more by noticing that the expression for $b'_i$ creates the sequence 
-% \begin{equation}
-%     \bv{b}' = \{2, \frac{3}{2}, \frac{4}{3}, \frac{5}{4}, \dots, \frac{n+1}{n}\}.
-% \end{equation}
-% As a consequence, we can write 
-% \begin{equation}
-%     b'_{i+1} = \frac{i+2}{i+1}
-% \end{equation}
 
 \section*{Problem 10}
+
+Table~\ref{tab:timing} shows the time used for 100 runs of the algorithms. From the number of FLOPs for each of the two algorithms (Eq.~\ref{eq:genFlop} anf \ref{eq:specFlop}) we would expect an relative factor
+\begin{equation}
+    t_\mathrm{gen}/t_\mathrm{spec} \sim \frac{4}{3}
+\end{equation}
+between the two algorithms. From our measurements we see that the relative time factor fits quite well with the expectation.
+
+\begin{table}%[h!]
+    \centering
+    \caption{The table shows the time used, in seconds, for 100 runs of the general and special algorithms, for different numbers of steps. The last coloumn shown the time factor between the two algorithms.}
+%    \begin{tabular}{rrrr}
+    \begin{tabular}{c@{\hspace{1cm}} c @{\hspace{1cm}} c @{\hspace{1cm}} c}
+        \hline
+            $n_\mathrm{steps}$ & $t_\mathrm{gen}\, (\mathrm{s})$ & $t_\mathrm{spec}\, (\mathrm{s})$ & $t_\mathrm{gen}/t_\mathrm{spec}$ \\
+%            & & & \multicolumn{1}{c}{c} \\
+        \hline
+            $10$   & $4.62\cdot 10^{-4}$ & $2.54\cdot 10^{-4}$ & $1.82$ \\
+            $10^2$ & $2.44\cdot 10^{-3}$ & $1.91\cdot 10^{-3}$ & $1.28$ \\
+            $10^3$ & $2.12\cdot 10^{-2}$ & $1.77\cdot 10^{-2}$ & $1.20$ \\
+            $10^4$ & $2.27\cdot 10^{-1}$ & $1.20\cdot 10^{-1}$ & $1.15$ \\
+            $10^5$ & $1.93$              & $1.57$              & $1.23$ \\
+            $10^6$ & $28.7$              & $21.4$              & $1.34$ \\
+        \hline
+    \end{tabular}\label{tab:timing}
+\end{table}
 
 
 \end{document}

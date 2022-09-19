@@ -8,7 +8,7 @@
 
 
 // Write two vectors to file
-int toFile(arma::mat xy, std::string filename, int prec); 
+int matToFile(arma::mat xy, std::string filename, int prec); 
 
 // Initialise an x-axis (not including endpoints)
 arma::vec xAxis(int n_steps, double x_min, double h);
