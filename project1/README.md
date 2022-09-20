@@ -17,6 +17,7 @@ To generate the plots, run
 `python plot.py`
 
 For problem 7 and 10 the maximal number of steps on the x-axis is set by the two variables at the top of the `main` function.
-Similar variables has to be set in 'plot.py' for problem 7 and 8. 
+Similar variables has to be set in `plot.py` for problem 7 and 8. 
 
+Headers and source code are found in `include/` and `src/`, respectively.
 
