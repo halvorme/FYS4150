@@ -2,7 +2,6 @@ template/
 testing/
 snippets.cpp
 lectures2015.pdf
-*.pdf
 *.txt
 
 .DS_Store
@@ -10,16 +9,7 @@ lectures2015.pdf
 
 *.exe
 *.o
-*.aux
-*.bbl
-*.blg
-*.fdb_latexmk
-*.fls
-*.log
-*.out
-*.gz
-*.bib
 project1/problem2/
 project1/problem7/
-project1/report/
-!project1/report.pdf
+report/
+imgs/
