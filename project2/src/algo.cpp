@@ -29,7 +29,7 @@ arma::mat analEigvec(const int N, const double d, const double a)
 			eigvec(j,i) = std::sin((M_PI*(i+1)*(j+1))/(N+1));
 		}
 	}
-
+	// Normalises vectors before they are returned
 	return arma::normalise(eigvec);
 }
 
@@ -48,8 +48,10 @@ int jacobi_rotate(arma::mat& A, arma::mat& R, const int k, const int l)
 
 	double a_ki, a_li, r_ik, r_il;
 
+	// tan, cos and sin
 	double t, s, c;
 
+	// Finds the trig functions of the rotation angle
 	double tau = (a_ll - a_kk)/(2.*a_kl);
 	if (tau >= 0.)
 	{
@@ -62,7 +64,7 @@ int jacobi_rotate(arma::mat& A, arma::mat& R, const int k, const int l)
 	c = 1./std::sqrt(1. + t*t);
 	s = c*t;
 
-	// Update A
+	// Updates A
 	A(k,k) = c*c*a_kk + s*s*a_ll - 2.*c*s*a_kl;
 	A(l,l) = c*c*a_ll + s*s*a_kk + 2.*c*s*a_kl;
 	A(k,l) = 0;
@@ -79,7 +81,7 @@ int jacobi_rotate(arma::mat& A, arma::mat& R, const int k, const int l)
 			A(l,i) = c*a_li + s*a_ki;
 			A(i,l) = A(l,i);
 		}
-		// Update R
+		// Updates R
 		r_ik = R(i,k);
 		r_il = R(i,l);
 		R(i,k) = c*r_ik - s*r_il;
@@ -101,16 +103,18 @@ int jacobi_eigensolver(const arma::mat& A, double eps, arma::vec& eigenvalues,
 {
 	int N = A.n_cols;
 
+	// Initialise eigenvector matrix with correct size
 	eigenvectors = arma::mat(N, N);
 
+	// Initialise copy of A to work with and rotation matrix R
 	arma::mat B = A;
 	arma::mat R = arma::mat(N, N, arma::fill::eye);
 	int k, l;
 
 	double maxval = max_offdiag_symmetric(B, k, l);
-
 	iter = 0;
 
+	// Runs Jacobi's method until B is diagonal or the maximum number of iterations is reached
 	while (maxval > eps && iter < maxiter)
 	{
 		jacobi_rotate(B, R, k, l);
@@ -119,11 +123,13 @@ int jacobi_eigensolver(const arma::mat& A, double eps, arma::vec& eigenvalues,
 		iter++;
 	}
 
+	// Checks if Jacobi's method was completed
 	if (maxval > eps){converged = false;}
 	else{converged = true;}
 
 	if (converged)
 	{
+		// Sorts the eigenvalues and vectors
 		arma::uvec order = arma::sort_index(B.diag());
 		eigenvalues = sort(B.diag());
 
@@ -134,6 +140,7 @@ int jacobi_eigensolver(const arma::mat& A, double eps, arma::vec& eigenvalues,
 	}
 	else
 	{
+		// Returns error if method did not complete
 		std::cout << "Error: Jacobi's method did not converge in " << maxiter << " iterations." << std::endl;
 	}
 

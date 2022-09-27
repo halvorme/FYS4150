@@ -11,11 +11,14 @@ double max_offdiag_symmetric(const arma::mat& A, int& k, int& l)
 
 	double maxval = 0.;
 
+	// Runs over upper triangle
 	for (int i = 0; i < N; i++)
 	{
 		for (int j = i+1; j < N; j++)
 		{
 			double testval = std::abs(A(i,j));
+
+			// Check if biggest
 			if (testval > maxval)
 			{
 				maxval = testval;

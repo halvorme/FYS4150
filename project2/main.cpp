@@ -3,6 +3,7 @@
 
 int main()
 {
+	// Initialise 6x6 matrix A
 	int N = 6;
 	double h = 1./(N+1.);
 
@@ -29,7 +30,8 @@ int main()
 
 	problem4(A, eps, maxiter, eigval_jac, eigvec_jac, eigval_anal, eigvec_anal);
 
-	int N_max = 21;
+	// This number is multiplied by 10
+	int N_max = 21; 
 
 	problem5(eps, maxiter, N_max);
 

@@ -91,24 +91,27 @@ int problem3()
 }
 
 
+// Tests the implementation of Jacobi's method
 int problem4(const arma::mat& A, const double eps, const int maxiter, arma::vec& eigval_jac, 
 				arma::mat& eigvec_jac, arma::vec& eigval_anal, arma::mat& eigvec_anal)
 {
 	bool converged;
 	int iter;
 
+	// Computes algorithm
 	jacobi_eigensolver(A, eps, eigval_jac, eigvec_jac, maxiter, iter, converged);
 
+	// Stop if method did not converge
 	if (!converged)
 	{
 		return 1;
 	}
-	
 
+	// Compares numerical result to analytic solution
 	bool approxval = arma::approx_equal(eigval_anal, eigval_jac, "absdiff", 1e-9);
 	bool approxvec = arma::approx_equal(eigvec_anal, eigvec_jac, "absdiff", 1e-9);
 
-
+	// Prints results to terminal
 	std::cout << "Problem 4 - Jacobi's method" << std::endl << std::endl;
 
 	std::cout << "Number of iterations: " << iter << std::endl << std::endl;;
@@ -135,6 +138,7 @@ int problem4(const arma::mat& A, const double eps, const int maxiter, arma::vec&
 }
 
 
+// Tests the efficiency of the algorithm, by running it for different values of N
 int problem5(const double eps, const int maxiter, const int N_max)
 {
 	int N;
@@ -149,9 +153,9 @@ int problem5(const double eps, const int maxiter, const int N_max)
 	std::ofstream ofile;
 	ofile.open("data/tri_iter.txt");
 
-	// int prec = 6;
 	int width = 10;
 
+	// Tests algorithm for tridiagonal matrix
 	for (int i = 1; i < N_max; i++)
 	{
 		N = 10*i;
@@ -171,6 +175,7 @@ int problem5(const double eps, const int maxiter, const int N_max)
 
 	ofile.close();
 
+	// Tests algorithm for dense matrix
 	ofile.open("data/dense_iter.txt");
 	for (int i = 1; i < N_max; i++)
 	{
@@ -215,17 +220,23 @@ int problem6(const double eps, const int maxiter)
 
 	arma::mat A = triMat(N, a, d, a);
 
+	// Finds numerical solution
 	jacobi_eigensolver(A, eps, eigval, eigvec, maxiter, iter, converged);
 
+	// Finds analytic solution
 	arma::mat eigvec_anal = analEigvec(N, d, a);
+	
 	std::string filename;
 
+	// Writes numerical solution to file
 	filename = "x_v10.txt";
 	printVec(filename, eigvec, h);
 
+	// Writes analytic solution to file
 	filename = "x_u10.txt";
 	printVec(filename, eigvec_anal, h);
 
+	// Same as above with different N (PS: Time was up...)
 	N = 99;
 
 	h = 1./(N+1.);
