@@ -6,9 +6,13 @@
 #include "utils.hpp"
 #include "algo.hpp"
 
-int problem2();
+int problem2(const int N, const arma::mat A, const double d, const double a, arma::vec& eigval_anal, arma::mat& eigvec_anal);
 
 int problem3();
+
+int problem4(const arma::mat& A, const double eps, const int maxiter, arma::vec& eigval_jac, 
+				arma::mat& eigvec_jac, arma::vec& eigval_anal, arma::mat& eigvec_anal);
+
 
 
 #endif
