@@ -1,7 +1,10 @@
 #include <armadillo>
 #include <cmath>
+#include <fstream>
+#include <iomanip>
 
 #include "tasks.hpp"
+#include "utils.hpp"
 
 int problem2(const int N, const arma::mat A, const double d, const double a, arma::vec& eigval_anal, arma::mat& eigvec_anal)
 {
@@ -127,6 +130,120 @@ int problem4(const arma::mat& A, const double eps, const int maxiter, arma::vec&
 	if (approxvec){std::cout << "True";}
 	else {std::cout << "False";}
 	std::cout << std::endl << std::endl << std::endl;
+
+	return 0;
+}
+
+
+int problem5(const double eps, const int maxiter, const int N_max)
+{
+	int N;
+	double h, a, d;
+
+	int iter;
+	bool converged;
+
+	arma::vec eigval;
+	arma::mat eigvec;
+
+	std::ofstream ofile;
+	ofile.open("data/tri_iter.txt");
+
+	// int prec = 6;
+	int width = 10;
+
+	for (int i = 1; i < N_max; i++)
+	{
+		N = 10*i;
+		h = 1./(N+1.);
+
+		a = -1./(h*h);
+		d = 2./(h*h);
+
+		arma::mat A = triMat(N, a, d, a);
+
+		jacobi_eigensolver(A, eps, eigval, eigvec, maxiter, iter, converged);
+
+		ofile << std::setw(width) << N;
+		ofile << std::setw(width) << iter;
+		ofile << std::endl;
+	}
+
+	ofile.close();
+
+	ofile.open("data/dense_iter.txt");
+	for (int i = 1; i < N_max; i++)
+	{
+		N = 10*i;
+		h = 1./(N+1.);
+
+		a = -1./(h*h);
+		d = 2./(h*h);
+
+		// Generate random symmetric matrix
+		arma::mat A = arma::mat(N, N).randn();  
+		A = arma::symmatu(A);
+
+		jacobi_eigensolver(A, eps, eigval, eigvec, maxiter, iter, converged);
+
+		ofile << std::setw(width) << N;
+		ofile << std::setw(width) << iter;
+		ofile << std::endl;
+	}
+
+	ofile.close();
+
+	return 0;
+}
+
+
+int problem6(const double eps, const int maxiter)
+{
+	int N = 9;
+	double h, a, d;
+
+	int iter;
+	bool converged;
+
+	arma::vec eigval;
+	arma::mat eigvec;
+
+	h = 1./(N+1.);
+
+	a = -1./(h*h);
+	d = 2./(h*h);
+
+	arma::mat A = triMat(N, a, d, a);
+
+	jacobi_eigensolver(A, eps, eigval, eigvec, maxiter, iter, converged);
+
+	arma::mat eigvec_anal = analEigvec(N, d, a);
+	std::string filename;
+
+	filename = "x_v10.txt";
+	printVec(filename, eigvec, h);
+
+	filename = "x_u10.txt";
+	printVec(filename, eigvec_anal, h);
+
+	N = 99;
+
+	h = 1./(N+1.);
+
+	a = -1./(h*h);
+	d = 2./(h*h);
+
+	A = triMat(N, a, d, a);
+
+	jacobi_eigensolver(A, eps, eigval, eigvec, maxiter, iter, converged);
+
+	eigvec_anal = analEigvec(N, d, a);
+	
+	filename = "x_v100.txt";
+	printVec(filename, eigvec, h);
+
+	filename = "x_u100.txt";
+	printVec(filename, eigvec_anal, h);
 
 	return 0;
 }

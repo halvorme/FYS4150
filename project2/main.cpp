@@ -22,14 +22,18 @@ int main()
 
 
 	double eps = 1e-8;
-	int maxiter = 1000;
-	// int iter;
+	int maxiter = pow(10,6);
 
 	arma::vec eigval_jac(N);
 	arma::mat eigvec_jac(N, N);
 
 	problem4(A, eps, maxiter, eigval_jac, eigvec_jac, eigval_anal, eigvec_anal);
 
+	int N_max = 21;
+
+	problem5(eps, maxiter, N_max);
+
+	problem6(eps, maxiter);
 
 	return 0;
 }
