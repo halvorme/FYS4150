@@ -1,6 +1,8 @@
 #include "PenningTrap.hpp"
 
 #include <vector>
+#include <iomanip>
+#include <fstream>
 
 #include "Particle.hpp"
 
@@ -204,5 +206,65 @@ void PenningTrap::evolve_RK4(double dt, bool interaction)
                             + (kx1[i] + 2.*(kx2[i]+kx3[i]) + kx4[i]) / 6.);
         parts[i].set_vel(copy[i].vel() 
                             + (kv1[i] + 2.*(kv2[i]+kv3[i]) + kv4[i]) / 6.);
+    }
+}
+
+// Run the system in 'trap' for time 't'
+void PenningTrap::runExperiment(int n, double t, std::string filename, 
+                                bool interaction)
+{
+    double dt = t/n;
+    int n_parts = parts.size();
+
+    std::vector<std::ofstream> ofile(n_parts);
+
+    for (int i = 0; i < n_parts; i++)
+    {
+        ofile[i].open(filename + std::to_string(i+1) + ".txt");
+    }
+
+    int prec = 8;
+    int width = prec + 10;
+
+    for (int i = 0; i < n_parts; i++)
+    {
+        ofile[i] << std::setw(width) << std::setprecision(prec) 
+                    << std::scientific << 0.;
+        for (int j = 0; j < 3; j++)
+        {
+            ofile[i] << std::setw(width) << std::setprecision(prec) 
+                        << std::scientific << parts[i].pos()(j);
+            ofile[i] << std::setw(width) << std::setprecision(prec) 
+                        << std::scientific << parts[i].vel()(j);
+        }
+    }
+    for (int i = 0; i < n_parts; i++)
+    {
+        ofile[i] << std::endl;
+    }
+
+    for (int m = 0; m < n; m++)
+    {
+        evolve_RK4(dt, interaction);
+        // trap.evolve_forward_Euler(dt, interaction);
+
+        for (int i = 0; i < n_parts; i++)
+        {
+            ofile[i] << std::setw(width) << std::setprecision(prec) 
+                        << std::scientific << (m+1)*dt;
+            for (int j = 0; j < 3; j++)
+            {
+                ofile[i] << std::setw(width) << std::setprecision(prec) 
+                            << std::scientific << parts[i].pos()(j);
+                ofile[i] << std::setw(width) << std::setprecision(prec) 
+                            << std::scientific << parts[i].vel()(j);
+            }
+            ofile[i] << std::endl;
+        }
+    }
+
+    for (int i = 0; i < n_parts; i++)
+    {
+        ofile[i].close();
     }
 }

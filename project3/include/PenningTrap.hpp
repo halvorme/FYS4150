@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <armadillo>
+#include <string>
 
 #include "Particle.hpp"
 
@@ -47,6 +48,11 @@ public:
 
     // Evolve the system one time step (dt) using Runge-Kutta 4th order
     void evolve_RK4(double dt, bool interaction = true);
+
+    // Run the system in 'trap' for time 't'
+    void runExperiment(int n, double t, std::string filename, 
+                        bool interaction = true);
+
 };
 
 
