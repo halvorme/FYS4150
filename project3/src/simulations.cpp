@@ -39,14 +39,18 @@ int two_parts()
     arma::vec3 ipos2 = {25, 25, 0};
     arma::vec3 ivel2 = {0, 40, 5};
 
-    PenningTrap trap;
+    PenningTrap trap_int, trap_noint;
 
     Particle p1(ipos1, ivel1), p2(ipos2, ivel2);
 
-    trap.add_particle(p1);
-    trap.add_particle(p2);
+    trap_int.add_particle(p1);
+    trap_int.add_particle(p2);
 
-    trap.runExperiment(n, t, "data/twoparts");
+    trap_noint.add_particle(p1);
+    trap_noint.add_particle(p2);
+
+    trap_int.runExperiment(n, t, "data/twoparts_int");
+    trap_noint.runExperiment(n, t, "data/twoparts_noint", false);
 
     return 0;
 }
