@@ -104,24 +104,30 @@ const arma::vec3 PenningTrap::total_force_particles(int i)
 }
 
 // The total force on particle_i from both external fields and other particles
-const arma::vec3 PenningTrap::total_force(int i)
+const arma::vec3 PenningTrap::total_force(int i, bool interaction)
 {
-    arma::vec3 F_tot = total_force_external(i) + total_force_particles(i);
+    arma::vec3 F_tot = total_force_external(i);
+
+    if (interaction)
+    {
+        F_tot += total_force_particles(i);
+    }
 
     return F_tot;
 }
 
 // Evolve the system one time step (dt) using Forward Euler
-void PenningTrap::evolve_forward_Euler(double dt)
+void PenningTrap::evolve_forward_Euler(double dt, bool interaction)
 {
     int n = parts.size();
+
     std::vector<Particle> old = parts;
     arma::vec3 newpos, newvel;
 
     std::vector<arma::vec3> forces(n);
     for (int i = 0; i < n; i++)
     {
-        forces[i] = total_force(i);
+        forces[i] = total_force(i, interaction);
     }
 
     for (int i = 0; i < n; i++)
@@ -131,5 +137,72 @@ void PenningTrap::evolve_forward_Euler(double dt)
 
         parts[i].set_pos(newpos);
         parts[i].set_vel(newvel);
+    }
+}
+
+// Evolve the system one time step (dt) using Runge-Kutta 4th order
+void PenningTrap::evolve_RK4(double dt, bool interaction)
+{
+    int n = parts.size();
+    std::vector<Particle> copy = parts;
+    std::vector<arma::vec3> kx1(n), kx2(n), kx3(n), kx4(n);
+    std::vector<arma::vec3> kv1(n), kv2(n), kv3(n), kv4(n);
+
+    // Find k1
+    for (int i = 0; i < n; i++)
+    {
+        kx1[i] = dt * parts[i].vel();
+        kv1[i] = dt / parts[i].mass() * total_force(i, interaction);
+    }
+
+    // Set first intermediate position and velocity of all particles
+    for (int i = 0; i < n; i++)
+    {
+        parts[i].set_pos(copy[i].pos() + kx1[i]/2.);
+        parts[i].set_vel(copy[i].vel() + kv1[i]/2.);
+    }
+
+    // Find k2
+    for (int i = 0; i < n; i++)
+    {
+        kx2[i] = dt * parts[i].vel();
+        kv2[i] = dt / parts[i].mass() * total_force(i, interaction);
+    }
+
+    // Set second intermediate position and velocity of all particles
+    for (int i = 0; i < n; i++)
+    {
+        parts[i].set_pos(copy[i].pos() + kx2[i]/2.);
+        parts[i].set_vel(copy[i].vel() + kv2[i]/2.);
+    }
+
+    // Find k3
+    for (int i = 0; i < n; i++)
+    {
+        kx3[i] = dt * parts[i].vel();
+        kv3[i] = dt / parts[i].mass() * total_force(i, interaction);
+    }
+
+    // Set third intermediate position and velocity of all particles
+    for (int i = 0; i < n; i++)
+    {
+        parts[i].set_pos(copy[i].pos() + kx3[i]);
+        parts[i].set_vel(copy[i].vel() + kv3[i]);
+    }
+
+    // Find k4
+    for (int i = 0; i < n; i++)
+    {
+        kx4[i] = dt * parts[i].vel();
+        kv4[i] = dt / parts[i].mass() * total_force(i, interaction);
+    }
+
+    // Set final position and velocity
+    for (int i = 0; i < n; i++)
+    {
+        parts[i].set_pos(copy[i].pos() 
+                            + (kx1[i] + 2.*(kx2[i]+kx3[i]) + kx4[i]) / 6.);
+        parts[i].set_vel(copy[i].vel() 
+                            + (kv1[i] + 2.*(kv2[i]+kv3[i]) + kv4[i]) / 6.);
     }
 }

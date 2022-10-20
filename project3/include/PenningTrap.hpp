@@ -40,13 +40,13 @@ public:
     const arma::vec3 total_force_particles(int i);
 
     // The total force on particle_i from both external fields and other particles
-    const arma::vec3 total_force(int i);
-
-    // // Evolve the system one time step (dt) using Runge-Kutta 4th order
-    // void evolve_RK4(double dt);
+    const arma::vec3 total_force(int i, bool interaction);
 
     // Evolve the system one time step (dt) using Forward Euler
-    void evolve_forward_Euler(double dt);
+    void evolve_forward_Euler(double dt, bool interaction = true);
+
+    // Evolve the system one time step (dt) using Runge-Kutta 4th order
+    void evolve_RK4(double dt, bool interaction = true);
 };
 
 
