@@ -210,8 +210,8 @@ void PenningTrap::evolve_RK4(double dt, bool interaction)
 }
 
 // Run the system in 'trap' for time 't'
-void PenningTrap::runExperiment(int n, double t, std::string filename, 
-                                bool interaction)
+int PenningTrap::runExperiment(int n, double t, std::string filename, 
+                                bool interaction, std::string method)
 {
     double dt = t/n;
     int n_parts = parts.size();
@@ -223,7 +223,7 @@ void PenningTrap::runExperiment(int n, double t, std::string filename,
         ofile[i].open(filename + std::to_string(i+1) + ".txt");
     }
 
-    int prec = 8;
+    int prec = 10;
     int width = prec + 10;
 
     for (int i = 0; i < n_parts; i++)
@@ -245,8 +245,19 @@ void PenningTrap::runExperiment(int n, double t, std::string filename,
 
     for (int m = 0; m < n; m++)
     {
-        evolve_RK4(dt, interaction);
-        // trap.evolve_forward_Euler(dt, interaction);
+        if (method == "RK4")
+        {
+            evolve_RK4(dt, interaction);
+        }
+        else if (method == "Euler")
+        {
+            evolve_forward_Euler(dt, interaction);
+        }
+        else
+        {
+            std::cout << "Error: No method called " << method << std::endl;
+            return 1;
+        }
 
         for (int i = 0; i < n_parts; i++)
         {
@@ -267,4 +278,6 @@ void PenningTrap::runExperiment(int n, double t, std::string filename,
     {
         ofile[i].close();
     }
+
+    return 0;
 }

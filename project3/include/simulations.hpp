@@ -10,4 +10,6 @@ int single_part();
 
 int two_parts();
 
+int error_sim();
+
 #endif

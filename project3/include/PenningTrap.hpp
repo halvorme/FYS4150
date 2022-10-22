@@ -50,8 +50,8 @@ public:
     void evolve_RK4(double dt, bool interaction = true);
 
     // Run the system in 'trap' for time 't'
-    void runExperiment(int n, double t, std::string filename, 
-                        bool interaction = true);
+    int runExperiment(int n, double t, std::string filename, 
+                        bool interaction = true, std::string method = "RK4");
 
 };
 

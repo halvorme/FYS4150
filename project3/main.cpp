@@ -7,9 +7,11 @@
 
 int main()
 {
-    single_part();
+    // single_part();
 
-    two_parts();
+    // two_parts();
+
+    error_sim();
 
     return 0;
 }

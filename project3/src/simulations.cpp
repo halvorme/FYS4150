@@ -54,3 +54,36 @@ int two_parts()
 
     return 0;
 }
+
+
+int error_sim()
+{
+    double t = 50.;
+
+    std::vector<int> n(4);
+    n[0] = 4000;
+    n[1] = 8000;
+    n[2] = 16000;
+    n[3] = 32000;
+
+    arma::vec3 r0 = {20 ,0, 20};
+    arma::vec3 v0 = {0, 25, 0};
+
+    Particle p0(r0, v0);
+
+    std::vector<PenningTrap> traps(8);
+
+    for (int i = 0; i < 4; i++)
+    {
+        traps[i].add_particle(p0);
+
+        traps[i].runExperiment(n[i], t, "data/errorRK4_" 
+                                + std::to_string(n[i]) + "_");
+
+        traps[i+4].add_particle(p0);
+        traps[i+4].runExperiment(n[i], t, "data/errorEuler_" + std::to_string(n[i]) 
+                                     + "_", true, "Euler");
+    }
+
+    return 0;
+}
