@@ -87,3 +87,34 @@ int error_sim()
 
     return 0;
 }
+
+
+int single_exact()
+{
+    double t = 50.;
+    double dt;
+
+    std::vector<int> n(4);
+    n[0] = 4000;
+    n[1] = 8000;
+    n[2] = 16000;
+    n[3] = 32000;
+
+    arma::vec3 r0 = {20 ,0, 20};
+    arma::vec3 v0 = {0, 25, 0};
+
+    PenningTrap init_trap;
+    Particle p(r0, v0);
+
+    init_trap.add_particle(p);
+
+    std::string filename = "data/exact_";
+
+    for (int i = 0; i < 4; i++)
+    {
+        init_trap.exact_sol(n[i], t, init_trap.parts[0], 
+                            filename + std::to_string(n[i]) + ".txt");
+    }
+
+    return 0;
+}

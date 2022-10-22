@@ -3,6 +3,7 @@
 #include <vector>
 #include <iomanip>
 #include <fstream>
+#include <cmath>
 
 #include "Particle.hpp"
 
@@ -23,7 +24,7 @@ PenningTrap::PenningTrap(double B0, double V0, double d)
     Vd_ = V0/(d*d);
 }
 
-PenningTrap::PenningTrap(double B0, double V0, double d, 
+PenningTrap::PenningTrap(double B0, double V0, double d,
                             std::vector<Particle> particles)
 {
     B0_ = B0;
@@ -71,7 +72,7 @@ const arma::vec3 PenningTrap::force_particle(int i, int j)
     Particle p2 = parts[j];
 
     arma::vec3 x = p1.pos() - p2.pos();
-    arma::vec3 F = k * p1.charge() * p2.charge() * x / pow(arma::norm(x), 3);
+    arma::vec3 F = k * p1.charge() * p2.charge() * x / std::pow(arma::norm(x), 3);
 
     return F;
 }
@@ -83,7 +84,7 @@ const arma::vec3 PenningTrap::total_force_external(int i)
 
     arma::vec3 F_ext = p.charge() * (E_field(p.pos()) 
                             + arma::cross(p.vel(), B_field(p.pos())));
-    
+
     return F_ext;
 }
 
@@ -119,7 +120,7 @@ const arma::vec3 PenningTrap::total_force(int i, bool interaction)
 }
 
 // Evolve the system one time step (dt) using Forward Euler
-void PenningTrap::evolve_forward_Euler(double dt, bool interaction)
+void PenningTrap::evolve_Euler(double dt, bool interaction)
 {
     int n = parts.size();
 
@@ -210,7 +211,7 @@ void PenningTrap::evolve_RK4(double dt, bool interaction)
 }
 
 // Run the system in 'trap' for time 't'
-int PenningTrap::runExperiment(int n, double t, std::string filename, 
+int PenningTrap::runExperiment(int n, double t, std::string filename,
                                 bool interaction, std::string method)
 {
     double dt = t/n;
@@ -228,13 +229,13 @@ int PenningTrap::runExperiment(int n, double t, std::string filename,
 
     for (int i = 0; i < n_parts; i++)
     {
-        ofile[i] << std::setw(width) << std::setprecision(prec) 
+        ofile[i] << std::setw(width) << std::setprecision(prec)
                     << std::scientific << 0.;
         for (int j = 0; j < 3; j++)
         {
-            ofile[i] << std::setw(width) << std::setprecision(prec) 
+            ofile[i] << std::setw(width) << std::setprecision(prec)
                         << std::scientific << parts[i].pos()(j);
-            ofile[i] << std::setw(width) << std::setprecision(prec) 
+            ofile[i] << std::setw(width) << std::setprecision(prec)
                         << std::scientific << parts[i].vel()(j);
         }
     }
@@ -251,7 +252,7 @@ int PenningTrap::runExperiment(int n, double t, std::string filename,
         }
         else if (method == "Euler")
         {
-            evolve_forward_Euler(dt, interaction);
+            evolve_Euler(dt, interaction);
         }
         else
         {
@@ -261,13 +262,13 @@ int PenningTrap::runExperiment(int n, double t, std::string filename,
 
         for (int i = 0; i < n_parts; i++)
         {
-            ofile[i] << std::setw(width) << std::setprecision(prec) 
+            ofile[i] << std::setw(width) << std::setprecision(prec)
                         << std::scientific << (m+1)*dt;
             for (int j = 0; j < 3; j++)
             {
-                ofile[i] << std::setw(width) << std::setprecision(prec) 
+                ofile[i] << std::setw(width) << std::setprecision(prec)
                             << std::scientific << parts[i].pos()(j);
-                ofile[i] << std::setw(width) << std::setprecision(prec) 
+                ofile[i] << std::setw(width) << std::setprecision(prec)
                             << std::scientific << parts[i].vel()(j);
             }
             ofile[i] << std::endl;
@@ -279,5 +280,80 @@ int PenningTrap::runExperiment(int n, double t, std::string filename,
         ofile[i].close();
     }
 
+    return 0;
+}
+
+
+double PenningTrap::omega_0(Particle p)
+{
+    return p.charge() * B0_ / p.mass();
+}
+
+
+double PenningTrap::omega_z(Particle p)
+{
+    return std::sqrt(2.*p.charge() * Vd_ / p.mass());
+}
+
+
+double PenningTrap::omega_1(Particle p)
+{
+    return (omega_0(p) + std::sqrt(std::pow(omega_0(p),2)
+            - 2.*std::pow(omega_z(p),2))) / 2.;
+}
+
+
+double PenningTrap::omega_2(Particle p)
+{
+    return (omega_0(p) - std::sqrt(std::pow(omega_0(p),2)
+            - 2.*std::pow(omega_z(p),2))) / 2.;
+}
+
+
+int PenningTrap::exact_sol(int n, double t_tot, Particle p,
+                            std::string filename)
+{
+    double dt = t_tot/n;
+
+    double wz = omega_z(p);
+    double w1 = omega_1(p);
+    double w2 = omega_2(p);
+
+    double x0 = p.pos()(0);
+    double v0 = p.vel()(1);
+    double z0 = p.pos()(2);
+
+    double A1 = (v0 + w2 * x0)/(w1 - w2);
+    double A2 = (v0 + w1 * x0)/(w1 - w2);
+
+    // t, x, vx, y, vy, z, vz
+    std::vector<double> exactval(7);
+    double t;
+
+    std::ofstream ofile;
+    ofile.open(filename);
+    int prec = 20;
+    int width = prec + 10;
+
+    for (int i = 0; i < n+1; i++)
+    {
+        t = i * dt;
+        exactval[0] = t;
+        exactval[1] = - A1 * std::cos(w1 * t) + A2 * std::cos(w2 * t);
+        exactval[2] = A1 * w1 * std::sin(w1 * t)
+                        - A2 * w2 * std::sin(w2 * t);
+        exactval[3] = A1 * std::sin(w1 * t) - A2 * std::sin(w2 * t);
+        exactval[4] = A1 * w1 * std::cos(w1 * t)
+                        - A2 * w2 * std::cos(w2 * t);
+        exactval[5] = z0 * std::cos(wz * t);
+        exactval[6] = - z0 * wz * std::sin(wz * t);
+
+        for (int j = 0; j < 7; j++)
+        {
+            ofile << std::setw(width) << std::setprecision(prec)
+                << std::scientific << exactval[j];
+        }
+        ofile << std::endl;
+    }
     return 0;
 }

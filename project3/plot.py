@@ -206,6 +206,22 @@ def plot_two_xy_int_new(filenames):
     fig.savefig("imgs/"+ filenames[0] + "_xy_new.pdf")
 
 
+def plot_rel_err(filename1, filename2):
+    n = [4000, 8000, 16000, 32000]
+
+    fig, ax = plt.subplots()
+    
+    for i in n:
+        t = np.loadtxt("data/" + filename1 + str(i) + "_1.txt", usecols=(0))
+        r_num = np.loadtxt("data/" + filename1 + str(i) + "_1.txt", usecols=(1,3,5))
+        r_an = np.loadtxt("data/" + filename2 + str(i) + ".txt", usecols=(1,3,5))
+    
+        rel_err = np.linalg.norm(r_an - r_num, axis=1)/np.linalg.norm(r_an, axis=1)
+
+        ax.semilogy(t, rel_err)
+
+    fig.savefig("imgs/relerr.pdf")
+
 
 
 
@@ -225,14 +241,18 @@ def main():
 
     # plot_two_xy_int_new(["twoparts_noint", "twoparts_int"])
 
-    plot_two_xvx("twoparts_noint")
-    plot_two_xvx("twoparts_int")
-    plot_two_zvz("twoparts_noint")
-    plot_two_zvz("twoparts_int")
-    plot_two_rvr("twoparts_noint")
-    plot_two_rvr("twoparts_int")
+    # plot_two_xvx("twoparts_noint")
+    # plot_two_xvx("twoparts_int")
+    # plot_two_zvz("twoparts_noint")
+    # plot_two_zvz("twoparts_int")
+    # plot_two_rvr("twoparts_noint")
+    # plot_two_rvr("twoparts_int")
 
     # plot_two_xy_int("twoparts_noint", "twoparts_int")
+
+    # plot_single_xy("exact_4000")
+
+    plot_rel_err("errorRK4_", "exact_")
 
     return 0
 

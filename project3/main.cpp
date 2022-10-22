@@ -13,5 +13,7 @@ int main()
 
     error_sim();
 
+    single_exact();
+
     return 0;
 }

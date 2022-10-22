@@ -68,11 +68,3 @@ void Particle::set_vel(arma::vec3 v)
 {
     v_ = v;
 }
-
-// const arma::vec3 Particle::F_Coloumb(Particle p2)
-// {
-//     arma::vec3 x = r_ - p2.pos();
-//     arma::vec3 F = k * q_ * p2.charge() * x / pow(arma::norm(x), 3);
-
-//     return F;
-// }

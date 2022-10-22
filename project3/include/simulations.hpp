@@ -12,4 +12,6 @@ int two_parts();
 
 int error_sim();
 
+int single_exact();
+
 #endif

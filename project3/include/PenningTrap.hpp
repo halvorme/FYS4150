@@ -11,9 +11,10 @@ class PenningTrap
 {
 private:
     double B0_, V0_, d_;
+    // Vd = V0/d^2
     double Vd_;
 
-    double k = 1.3893533e5;
+    const double k = 1.3893533e5;
 
 public:
     std::vector<Particle> parts;
@@ -44,14 +45,24 @@ public:
     const arma::vec3 total_force(int i, bool interaction);
 
     // Evolve the system one time step (dt) using Forward Euler
-    void evolve_forward_Euler(double dt, bool interaction = true);
+    void evolve_Euler(double dt, bool interaction = true);
 
     // Evolve the system one time step (dt) using Runge-Kutta 4th order
     void evolve_RK4(double dt, bool interaction = true);
 
     // Run the system in 'trap' for time 't'
     int runExperiment(int n, double t, std::string filename, 
-                        bool interaction = true, std::string method = "RK4");
+                        bool interaction = true, 
+                        std::string method = "RK4");
+    
+    double omega_0(Particle p);
+    double omega_z(Particle p);
+
+    // The phases omega_+ and omega_-
+    double omega_1(Particle p);
+    double omega_2(Particle p);
+
+    int exact_sol(int n, double t, Particle p, std::string filename);
 
 };
 
