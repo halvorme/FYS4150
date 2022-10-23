@@ -7,7 +7,6 @@ class Particle
 {
 private:
     double q_, m_;
-    double qm_;
     arma::vec3 r_, v_;
 
     double k = 1.3893533e5;
@@ -27,10 +26,6 @@ public:
     // Change particle position and velocity
     void set_pos(arma::vec3 r);
     void set_vel(arma::vec3 v);
-
-    // Coloumb force from particle 'p2'
-    // const arma::vec3 F_Coloumb(Particle p2);
-
 };
 
 #endif

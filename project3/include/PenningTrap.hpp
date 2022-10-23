@@ -11,8 +11,6 @@ class PenningTrap
 {
 private:
     double B0_, V0_, d_;
-    // Vd = V0/d^2
-    double Vd_;
 
     const double k = 1.3893533e5;
 
@@ -35,7 +33,7 @@ public:
     void add_particle(Particle p_in);
 
     // Counts number of particles in the trap
-    int num_parts_in_trap();
+    const int num_parts_in_trap();
 
     // Force on particle_i from particle_j
     const arma::vec3 force_particle(int i, int j);
@@ -60,14 +58,14 @@ public:
                         bool interaction = true, 
                         std::string method = "RK4");
     
-    double omega_0(Particle p);
-    double omega_z(Particle p);
+    const double omega_0(Particle p);
+    const double omega_z(Particle p);
 
     // The phases omega_+ and omega_-
-    double omega_1(Particle p);
-    double omega_2(Particle p);
+    const double omega_1(Particle p);
+    const double omega_2(Particle p);
 
-    int exact_sol(int n, double t, Particle p, std::string filename);
+    const int exact_sol(int n, double t, Particle p, std::string filename);
 
 };
 

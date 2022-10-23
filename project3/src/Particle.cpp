@@ -3,35 +3,19 @@
 #include <armadillo>
 
 // Constructors
-Particle::Particle()
+Particle::Particle(): q_(1.), m_(40.)
 {
-    q_ = 1.;
-    m_ = 40.;
-    qm_ = q_/m_;
-
     r_ = arma::vec3(arma::fill::zeros);
     v_ = arma::vec3(arma::fill::zeros);
 }
 
 Particle::Particle(arma::vec3 r, arma::vec3 v)
-{
-    q_ = 1.;
-    m_ = 40.;
-    qm_ = q_/m_;
-
-    r_ = r;
-    v_ = v;
-}
+    : q_(1.), m_(40.), r_(r), v_(v)
+{}
 
 Particle::Particle(double q, double m, arma::vec3 r, arma::vec3 v)
-{
-    q_ = q;
-    m_ = m;
-    qm_ = q/m;
-
-    r_ = r;
-    v_ = v;
-}
+    : q_(q), m_(m), r_(r), v_(v)
+{}
 
 // Read particle charge
 const double Particle::charge()

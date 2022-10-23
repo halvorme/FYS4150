@@ -10,52 +10,30 @@
 
 // Constructors
 PenningTrap::PenningTrap()
-{
-    B0_ = 96.5;
-    V0_ = 2.41e6;
-    d_ = 500.;
-    Vd_ = V0_/(d_*d_);
-}
+    : B0_(96.5), V0_(2.41e6), d_(500.)
+{}
 
 
 PenningTrap::PenningTrap(double B0, double V0, double d)
-{
-    B0_ = B0;
-    V0_ = V0;
-    d_ = d;
-    Vd_ = V0/(d*d);
-}
+    : B0_(B0), V0_(V0), d_(d)
+{}
 
 
 PenningTrap::PenningTrap(double B0, double V0, double d,
                             std::vector<Particle> particles)
-{
-    B0_ = B0;
-    V0_ = V0;
-    d_ = d;
-    Vd_ = V0/(d*d);
-    parts = particles;
-}
+    : B0_(B0), V0_(V0), d_(d), parts(particles)
+{}
 
 
 PenningTrap::PenningTrap(std::vector<Particle> particles)
-{
-    B0_ = 96.5;
-    V0_ = 2.41e6;
-    d_ = 500.;
-    Vd_ = V0_/(d_*d_);
-    parts = particles;
-}
+    : B0_(96.5), V0_(2.41e6), d_(500.), parts(particles)
+{}
 
 
 // Initiates a Penning trap with 'n' particles, with random positions and velocities
 PenningTrap::PenningTrap(int n)
+    : B0_(96.5), V0_(2.41e6), d_(500.)
 {
-    B0_ = 96.5;
-    V0_ = 2.41e6;
-    d_ = 500.;
-    Vd_ = V0_/(d_*d_);
-
     arma::vec3 r, v;
     Particle p;
 
@@ -75,9 +53,9 @@ PenningTrap::PenningTrap(int n)
 const arma::vec3 PenningTrap::E_field(arma::vec3 r)
 {
     arma::vec3 E;
-    E(0) = Vd_*r(0);
-    E(1) = Vd_*r(1);
-    E(2) = -2.*Vd_*r(2);
+    E(0) = V0_/(d_*d_)*r(0);
+    E(1) = V0_/(d_*d_)*r(1);
+    E(2) = -2.*V0_/(d_*d_)*r(2);
     return E;
 }
 
@@ -91,6 +69,26 @@ const arma::vec3 PenningTrap::B_field(arma::vec3 r)
 void PenningTrap::add_particle(Particle p_in)
 {
     parts.push_back(p_in);
+}
+
+
+// Counts number of particles in the trap
+const int PenningTrap::num_parts_in_trap()
+{
+    int n_tot = parts.size();
+    int n = 0;
+
+    for (int i = 0; i < n_tot; i++)
+    {
+        double r = arma::norm(parts[i].pos());
+
+        if (r<d_)
+        {
+            n += 1;
+        }
+    }
+
+    return n;
 }
 
 
@@ -318,33 +316,33 @@ int PenningTrap::run_experiment(int n, double t, std::string filename,
 }
 
 
-double PenningTrap::omega_0(Particle p)
+const double PenningTrap::omega_0(Particle p)
 {
     return p.charge() * B0_ / p.mass();
 }
 
 
-double PenningTrap::omega_z(Particle p)
+const double PenningTrap::omega_z(Particle p)
 {
-    return std::sqrt(2.*p.charge() * Vd_ / p.mass());
+    return std::sqrt(2. * p.charge()/p.mass() * V0_/(d_*d_));
 }
 
 
-double PenningTrap::omega_1(Particle p)
+const double PenningTrap::omega_1(Particle p)
 {
     return (omega_0(p) + std::sqrt(std::pow(omega_0(p),2)
             - 2.*std::pow(omega_z(p),2))) / 2.;
 }
 
 
-double PenningTrap::omega_2(Particle p)
+const double PenningTrap::omega_2(Particle p)
 {
     return (omega_0(p) - std::sqrt(std::pow(omega_0(p),2)
             - 2.*std::pow(omega_z(p),2))) / 2.;
 }
 
 
-int PenningTrap::exact_sol(int n, double t_tot, Particle p,
+const int PenningTrap::exact_sol(int n, double t_tot, Particle p,
                             std::string filename)
 {
     double dt = t_tot/n;
@@ -389,24 +387,8 @@ int PenningTrap::exact_sol(int n, double t_tot, Particle p,
         }
         ofile << std::endl;
     }
+    ofile.close();
+    
     return 0;
 }
 
-// Counts number of particles in the trap
-int PenningTrap::num_parts_in_trap()
-{
-    int n_tot = parts.size();
-    int n = 0;
-
-    for (int i = 0; i < n_tot; i++)
-    {
-        double r = arma::norm(parts[i].pos());
-
-        if (r<d_)
-        {
-            n += 1;
-        }
-    }
-
-    return n;
-}
