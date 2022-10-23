@@ -27,9 +27,11 @@ public:
     // the particles given in 'parts'
     PenningTrap(std::vector<Particle> parts);
 
+    PenningTrap(bool interaction);
+
     // Initialises a trap with default parameters and 'n' particles with 
     // random positions and velocities
-    PenningTrap(int n);
+    PenningTrap(int n, bool interaction);
 
 
     // Add a particle 'p' to the trap
@@ -40,12 +42,12 @@ public:
     const int num_parts_in_trap();
 
     // Run the system in 'trap' for time 't'
-    int run_experiment(int n, double t, std::string filename, 
-                        bool interaction = true, 
+    int run_experiment(int n, double t, std::string filename,
                         std::string method = "RK4");
 
     // Writes the exact solution for a single particle 'p' to file
-    const int exact_sol(int n, double t, Particle p, std::string filename);
+    const int exact_sol(int n, double t, Particle p, 
+                        std::string filename);
 
 private:
     // Coulomb constant
@@ -60,7 +62,7 @@ private:
 
     // Switch Coulomb interaction between particles 
     // on ('true') or off ('false')
-    bool interaction = true;
+    bool interaction_ = true;
 
 
     // Returns the external electric and magnetic field 
@@ -84,14 +86,14 @@ private:
     const arma::vec3 total_interaction_force(int i);
     // The total force on particle 'i' from both external fields 
     // and other particles
-    const arma::vec3 force(int i, bool interaction);
+    const arma::vec3 force(int i);
 
 
     // Evolve the system one time step (dt) using Euler method
-    void evolve_Euler(double dt, bool interaction = true);
+    void evolve_Euler(double dt);
     // Evolve the system one time step (dt) using 
     // Runge-Kutta 4th order
-    void evolve_RK4(double dt, bool interaction = true);
+    void evolve_RK4(double dt);
 
 };
 

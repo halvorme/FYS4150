@@ -27,9 +27,13 @@ PenningTrap::PenningTrap(std::vector<Particle> particles)
     : parts(particles)
 {}
 
+PenningTrap::PenningTrap(bool interaction) 
+    : interaction_(interaction)
+{}
 
 // Initiates a Penning trap with 'n' particles, with random positions and velocities
-PenningTrap::PenningTrap(int n)
+PenningTrap::PenningTrap(int n, bool interaction)
+    : interaction_(interaction)
 {
     arma::vec3 r, v;
     Particle p;
@@ -136,11 +140,11 @@ const arma::vec3 PenningTrap::total_interaction_force(int i)
 }
 
 // The total force on particle_i from both external fields and other particles
-const arma::vec3 PenningTrap::force(int i, bool interaction)
+const arma::vec3 PenningTrap::force(int i)
 {
     arma::vec3 F_tot = external_force(i);
 
-    if (interaction)
+    if (interaction_)
     {
         F_tot += total_interaction_force(i);
     }
@@ -149,7 +153,7 @@ const arma::vec3 PenningTrap::force(int i, bool interaction)
 }
 
 // Evolve the system one time step (dt) using Forward Euler
-void PenningTrap::evolve_Euler(double dt, bool interaction)
+void PenningTrap::evolve_Euler(double dt)
 {
     int n = parts.size();
 
@@ -159,7 +163,7 @@ void PenningTrap::evolve_Euler(double dt, bool interaction)
     std::vector<arma::vec3> forces(n);
     for (int i = 0; i < n; i++)
     {
-        forces[i] = force(i, interaction);
+        forces[i] = force(i);
     }
 
     for (int i = 0; i < n; i++)
@@ -173,7 +177,7 @@ void PenningTrap::evolve_Euler(double dt, bool interaction)
 }
 
 // Evolve the system one time step (dt) using Runge-Kutta 4th order
-void PenningTrap::evolve_RK4(double dt, bool interaction)
+void PenningTrap::evolve_RK4(double dt)
 {
     int n = parts.size();
     std::vector<Particle> copy = parts;
@@ -184,7 +188,7 @@ void PenningTrap::evolve_RK4(double dt, bool interaction)
     for (int i = 0; i < n; i++)
     {
         kx1[i] = dt * parts[i].vel();
-        kv1[i] = dt / parts[i].mass() * force(i, interaction);
+        kv1[i] = dt / parts[i].mass() * force(i);
     }
 
     // Set first intermediate position and velocity of all particles
@@ -198,7 +202,7 @@ void PenningTrap::evolve_RK4(double dt, bool interaction)
     for (int i = 0; i < n; i++)
     {
         kx2[i] = dt * parts[i].vel();
-        kv2[i] = dt / parts[i].mass() * force(i, interaction);
+        kv2[i] = dt / parts[i].mass() * force(i);
     }
 
     // Set second intermediate position and velocity of all particles
@@ -212,7 +216,7 @@ void PenningTrap::evolve_RK4(double dt, bool interaction)
     for (int i = 0; i < n; i++)
     {
         kx3[i] = dt * parts[i].vel();
-        kv3[i] = dt / parts[i].mass() * force(i, interaction);
+        kv3[i] = dt / parts[i].mass() * force(i);
     }
 
     // Set third intermediate position and velocity of all particles
@@ -226,7 +230,7 @@ void PenningTrap::evolve_RK4(double dt, bool interaction)
     for (int i = 0; i < n; i++)
     {
         kx4[i] = dt * parts[i].vel();
-        kv4[i] = dt / parts[i].mass() * force(i, interaction);
+        kv4[i] = dt / parts[i].mass() * force(i);
     }
 
     // Set final position and velocity
@@ -241,7 +245,7 @@ void PenningTrap::evolve_RK4(double dt, bool interaction)
 
 // Run the system in 'trap' for time 't'
 int PenningTrap::run_experiment(int n, double t, std::string filename,
-                                bool interaction, std::string method)
+                                std::string method)
 {
     double dt = t/n;
     int n_parts = parts.size();
@@ -277,11 +281,11 @@ int PenningTrap::run_experiment(int n, double t, std::string filename,
     {
         if (method == "RK4")
         {
-            evolve_RK4(dt, interaction);
+            evolve_RK4(dt);
         }
         else if (method == "Euler")
         {
-            evolve_Euler(dt, interaction);
+            evolve_Euler(dt);
         }
         else
         {

@@ -39,7 +39,7 @@ int two_parts()
     arma::vec3 ipos2 = {25, 25, 0};
     arma::vec3 ivel2 = {0, 40, 5};
 
-    PenningTrap trap_int, trap_noint;
+    PenningTrap trap_int, trap_noint(false);
 
     Particle p1(ipos1, ivel1), p2(ipos2, ivel2);
 
@@ -50,7 +50,7 @@ int two_parts()
     trap_noint.add_particle(p2);
 
     trap_int.run_experiment(n, t, "data/twoparts_int");
-    trap_noint.run_experiment(n, t, "data/twoparts_noint", false);
+    trap_noint.run_experiment(n, t, "data/twoparts_noint");
 
     return 0;
 }
@@ -82,7 +82,7 @@ int error_sim()
 
         traps[i+4].add_particle(p0);
         traps[i+4].run_experiment(n[i], t, "data/errorEuler_" + std::to_string(n[i]) 
-                                     + "_", true, "Euler");
+                                     + "_", "Euler");
     }
 
     return 0;
