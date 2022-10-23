@@ -7,6 +7,7 @@
 
 #include "Particle.hpp"
 
+
 // Constructors
 PenningTrap::PenningTrap()
 {
@@ -16,6 +17,7 @@ PenningTrap::PenningTrap()
     Vd_ = V0_/(d_*d_);
 }
 
+
 PenningTrap::PenningTrap(double B0, double V0, double d)
 {
     B0_ = B0;
@@ -23,6 +25,7 @@ PenningTrap::PenningTrap(double B0, double V0, double d)
     d_ = d;
     Vd_ = V0/(d*d);
 }
+
 
 PenningTrap::PenningTrap(double B0, double V0, double d,
                             std::vector<Particle> particles)
@@ -34,6 +37,7 @@ PenningTrap::PenningTrap(double B0, double V0, double d,
     parts = particles;
 }
 
+
 PenningTrap::PenningTrap(std::vector<Particle> particles)
 {
     B0_ = 96.5;
@@ -41,6 +45,30 @@ PenningTrap::PenningTrap(std::vector<Particle> particles)
     d_ = 500.;
     Vd_ = V0_/(d_*d_);
     parts = particles;
+}
+
+
+// Initiates a Penning trap with 'n' particles, with random positions and velocities
+PenningTrap::PenningTrap(int n)
+{
+    B0_ = 96.5;
+    V0_ = 2.41e6;
+    d_ = 500.;
+    Vd_ = V0_/(d_*d_);
+
+    arma::vec3 r, v;
+    Particle p;
+
+    for (int i = 0; i < n; i++)
+    {
+        r = arma::vec(3).randn() * .1 * d_;
+        v = arma::vec(3).randn() * .1 * d_;
+
+        p.set_pos(r);
+        p.set_vel(v);
+
+        parts.push_back(p);
+    }
 }
 
 // Electric and magnetic field
@@ -82,8 +110,14 @@ const arma::vec3 PenningTrap::total_force_external(int i)
 {
     Particle p = parts[i];
 
-    arma::vec3 F_ext = p.charge() * (E_field(p.pos()) 
+    double r = arma::norm(p.pos());
+    arma::vec3 F_ext(arma::fill::zeros);
+
+    if (r < d_)
+    {
+        F_ext = p.charge() * (E_field(p.pos()) 
                             + arma::cross(p.vel(), B_field(p.pos())));
+    }
 
     return F_ext;
 }
@@ -211,7 +245,7 @@ void PenningTrap::evolve_RK4(double dt, bool interaction)
 }
 
 // Run the system in 'trap' for time 't'
-int PenningTrap::runExperiment(int n, double t, std::string filename,
+int PenningTrap::run_experiment(int n, double t, std::string filename,
                                 bool interaction, std::string method)
 {
     double dt = t/n;
@@ -224,7 +258,7 @@ int PenningTrap::runExperiment(int n, double t, std::string filename,
         ofile[i].open(filename + std::to_string(i+1) + ".txt");
     }
 
-    int prec = 10;
+    int prec = 14;
     int width = prec + 10;
 
     for (int i = 0; i < n_parts; i++)
@@ -332,7 +366,7 @@ int PenningTrap::exact_sol(int n, double t_tot, Particle p,
 
     std::ofstream ofile;
     ofile.open(filename);
-    int prec = 20;
+    int prec = 14;
     int width = prec + 10;
 
     for (int i = 0; i < n+1; i++)
@@ -356,4 +390,23 @@ int PenningTrap::exact_sol(int n, double t_tot, Particle p,
         ofile << std::endl;
     }
     return 0;
+}
+
+// Counts number of particles in the trap
+int PenningTrap::num_parts_in_trap()
+{
+    int n_tot = parts.size();
+    int n = 0;
+
+    for (int i = 0; i < n_tot; i++)
+    {
+        double r = arma::norm(parts[i].pos());
+
+        if (r<d_)
+        {
+            n += 1;
+        }
+    }
+
+    return n;
 }

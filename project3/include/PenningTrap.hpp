@@ -25,12 +25,17 @@ public:
     PenningTrap(double B0, double V0, double d, std::vector<Particle> parts);
     PenningTrap(std::vector<Particle> parts);
 
+    PenningTrap(int n);
+
     // Electric and magnetic field at position 'r'
     const arma::vec3 E_field(arma::vec3 r);
     const arma::vec3 B_field(arma::vec3 r);
 
     // Add a particle to the trap
     void add_particle(Particle p_in);
+
+    // Counts number of particles in the trap
+    int num_parts_in_trap();
 
     // Force on particle_i from particle_j
     const arma::vec3 force_particle(int i, int j);
@@ -51,7 +56,7 @@ public:
     void evolve_RK4(double dt, bool interaction = true);
 
     // Run the system in 'trap' for time 't'
-    int runExperiment(int n, double t, std::string filename, 
+    int run_experiment(int n, double t, std::string filename, 
                         bool interaction = true, 
                         std::string method = "RK4");
     

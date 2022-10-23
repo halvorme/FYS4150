@@ -23,7 +23,7 @@ int single_part()
 
     trap.add_particle(p);
 
-    trap.runExperiment(n, t, "data/singlepart");
+    trap.run_experiment(n, t, "data/singlepart");
 
     return 0;
 }
@@ -49,8 +49,8 @@ int two_parts()
     trap_noint.add_particle(p1);
     trap_noint.add_particle(p2);
 
-    trap_int.runExperiment(n, t, "data/twoparts_int");
-    trap_noint.runExperiment(n, t, "data/twoparts_noint", false);
+    trap_int.run_experiment(n, t, "data/twoparts_int");
+    trap_noint.run_experiment(n, t, "data/twoparts_noint", false);
 
     return 0;
 }
@@ -77,11 +77,11 @@ int error_sim()
     {
         traps[i].add_particle(p0);
 
-        traps[i].runExperiment(n[i], t, "data/errorRK4_" 
+        traps[i].run_experiment(n[i], t, "data/errorRK4_" 
                                 + std::to_string(n[i]) + "_");
 
         traps[i+4].add_particle(p0);
-        traps[i+4].runExperiment(n[i], t, "data/errorEuler_" + std::to_string(n[i]) 
+        traps[i+4].run_experiment(n[i], t, "data/errorEuler_" + std::to_string(n[i]) 
                                      + "_", true, "Euler");
     }
 
