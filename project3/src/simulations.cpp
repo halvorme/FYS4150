@@ -92,7 +92,6 @@ int error_sim()
 int single_exact()
 {
     double t = 50.;
-    double dt;
 
     std::vector<int> n(4);
     n[0] = 4000;
