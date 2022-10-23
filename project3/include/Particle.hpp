@@ -3,14 +3,11 @@
 
 #include <armadillo>
 
+
+// Particle, described by its charge, mass, position and velocity.
+// Defaults to a ion with mass 40 u and charge +1 e.
 class Particle
 {
-private:
-    double q_, m_;
-    arma::vec3 r_, v_;
-
-    double k = 1.3893533e5;
-
 public:
     // Constructors
     Particle();
@@ -26,6 +23,15 @@ public:
     // Change particle position and velocity
     void set_pos(arma::vec3 r);
     void set_vel(arma::vec3 v);
+
+private:
+    // Charge and mass of particle
+    double q_ = 1.;
+    double m_ = 40.;
+
+    // Position and velocity of particle
+    arma::vec3 r_ = arma::vec3(arma::fill::zeros);
+    arma::vec3 v_ = arma::vec3(arma::fill::zeros);
 };
 
 #endif

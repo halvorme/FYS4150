@@ -3,14 +3,10 @@
 #include <armadillo>
 
 // Constructors
-Particle::Particle(): q_(1.), m_(40.)
-{
-    r_ = arma::vec3(arma::fill::zeros);
-    v_ = arma::vec3(arma::fill::zeros);
-}
+Particle::Particle() {}
 
 Particle::Particle(arma::vec3 r, arma::vec3 v)
-    : q_(1.), m_(40.), r_(r), v_(v)
+    : r_(r), v_(v)
 {}
 
 Particle::Particle(double q, double m, arma::vec3 r, arma::vec3 v)

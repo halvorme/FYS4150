@@ -323,7 +323,7 @@ def main():
     plt.rcParams.update({'lines.linewidth': 1., 'axes.grid': True, 'grid.linewidth': 0.5})
     plt.rcParams.update({'figure.autolayout': True})
 
-    # plot_single_xy("singlepart1")
+    plot_single_xy("singlepart1")
 
     # # First plot
     # plot_single_tz("singlepart1")
@@ -352,7 +352,7 @@ def main():
 
     # plot_single_xy("exact_4000")
 
-    plot_rel_err(["errorRK4", "errorEuler", "exact_"])
+    # plot_rel_err(["errorRK4", "errorEuler", "exact_"])
 
     return 0
 

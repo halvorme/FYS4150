@@ -8,10 +8,8 @@
 #include "Particle.hpp"
 
 
-// Constructors
-PenningTrap::PenningTrap()
-    : B0_(96.5), V0_(2.41e6), d_(500.)
-{}
+// Initialises an empty Penning trap with default values
+PenningTrap::PenningTrap() {}
 
 
 PenningTrap::PenningTrap(double B0, double V0, double d)
@@ -21,18 +19,17 @@ PenningTrap::PenningTrap(double B0, double V0, double d)
 
 PenningTrap::PenningTrap(double B0, double V0, double d,
                             std::vector<Particle> particles)
-    : B0_(B0), V0_(V0), d_(d), parts(particles)
+    : parts(particles), B0_(B0), V0_(V0), d_(d)
 {}
 
 
 PenningTrap::PenningTrap(std::vector<Particle> particles)
-    : B0_(96.5), V0_(2.41e6), d_(500.), parts(particles)
+    : parts(particles)
 {}
 
 
 // Initiates a Penning trap with 'n' particles, with random positions and velocities
 PenningTrap::PenningTrap(int n)
-    : B0_(96.5), V0_(2.41e6), d_(500.)
 {
     arma::vec3 r, v;
     Particle p;
@@ -66,9 +63,9 @@ const arma::vec3 PenningTrap::B_field(arma::vec3 r)
     return B;
 }
 
-void PenningTrap::add_particle(Particle p_in)
+void PenningTrap::add_particle(Particle p)
 {
-    parts.push_back(p_in);
+    parts.push_back(p);
 }
 
 
@@ -92,7 +89,7 @@ const int PenningTrap::num_parts_in_trap()
 }
 
 
-const arma::vec3 PenningTrap::force_particle(int i, int j)
+const arma::vec3 PenningTrap::interaction_force(int i, int j)
 {
     Particle p1 = parts[i];
     Particle p2 = parts[j];
@@ -104,7 +101,7 @@ const arma::vec3 PenningTrap::force_particle(int i, int j)
 }
 
 // The total force on particle_i from the external fields
-const arma::vec3 PenningTrap::total_force_external(int i)
+const arma::vec3 PenningTrap::external_force(int i)
 {
     Particle p = parts[i];
 
@@ -121,7 +118,7 @@ const arma::vec3 PenningTrap::total_force_external(int i)
 }
 
 // The total force on particle_i from the other particles
-const arma::vec3 PenningTrap::total_force_particles(int i)
+const arma::vec3 PenningTrap::total_interaction_force(int i)
 {
     int n = parts.size();
 
@@ -131,7 +128,7 @@ const arma::vec3 PenningTrap::total_force_particles(int i)
     {
         if (j != i)
         {
-            F += force_particle(i,j);
+            F += interaction_force(i,j);
         }
     }
 
@@ -139,13 +136,13 @@ const arma::vec3 PenningTrap::total_force_particles(int i)
 }
 
 // The total force on particle_i from both external fields and other particles
-const arma::vec3 PenningTrap::total_force(int i, bool interaction)
+const arma::vec3 PenningTrap::force(int i, bool interaction)
 {
-    arma::vec3 F_tot = total_force_external(i);
+    arma::vec3 F_tot = external_force(i);
 
     if (interaction)
     {
-        F_tot += total_force_particles(i);
+        F_tot += total_interaction_force(i);
     }
 
     return F_tot;
@@ -162,7 +159,7 @@ void PenningTrap::evolve_Euler(double dt, bool interaction)
     std::vector<arma::vec3> forces(n);
     for (int i = 0; i < n; i++)
     {
-        forces[i] = total_force(i, interaction);
+        forces[i] = force(i, interaction);
     }
 
     for (int i = 0; i < n; i++)
@@ -187,7 +184,7 @@ void PenningTrap::evolve_RK4(double dt, bool interaction)
     for (int i = 0; i < n; i++)
     {
         kx1[i] = dt * parts[i].vel();
-        kv1[i] = dt / parts[i].mass() * total_force(i, interaction);
+        kv1[i] = dt / parts[i].mass() * force(i, interaction);
     }
 
     // Set first intermediate position and velocity of all particles
@@ -201,7 +198,7 @@ void PenningTrap::evolve_RK4(double dt, bool interaction)
     for (int i = 0; i < n; i++)
     {
         kx2[i] = dt * parts[i].vel();
-        kv2[i] = dt / parts[i].mass() * total_force(i, interaction);
+        kv2[i] = dt / parts[i].mass() * force(i, interaction);
     }
 
     // Set second intermediate position and velocity of all particles
@@ -215,7 +212,7 @@ void PenningTrap::evolve_RK4(double dt, bool interaction)
     for (int i = 0; i < n; i++)
     {
         kx3[i] = dt * parts[i].vel();
-        kv3[i] = dt / parts[i].mass() * total_force(i, interaction);
+        kv3[i] = dt / parts[i].mass() * force(i, interaction);
     }
 
     // Set third intermediate position and velocity of all particles
@@ -229,7 +226,7 @@ void PenningTrap::evolve_RK4(double dt, bool interaction)
     for (int i = 0; i < n; i++)
     {
         kx4[i] = dt * parts[i].vel();
-        kv4[i] = dt / parts[i].mass() * total_force(i, interaction);
+        kv4[i] = dt / parts[i].mass() * force(i, interaction);
     }
 
     // Set final position and velocity

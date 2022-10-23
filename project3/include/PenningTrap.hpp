@@ -7,65 +7,91 @@
 
 #include "Particle.hpp"
 
+
+// Defines the state of a Penning trap and interface to simulate 
+// particle dynamics in the trap
 class PenningTrap
 {
-private:
-    double B0_, V0_, d_;
-
-    const double k = 1.3893533e5;
-
 public:
+    // List of particles in the trap
     std::vector<Particle> parts;
 
-    // Constructors
+    // Initialises an empty trap with default parameters
     PenningTrap();
+    // Initialises an empty trap with specified parameters
     PenningTrap(double B0, double V0, double d);
+    // Initialises a trap with specified parameters and 
+    // the particles given in 'parts'
     PenningTrap(double B0, double V0, double d, std::vector<Particle> parts);
+    // Initialises a trap with default parameters and 
+    // the particles given in 'parts'
     PenningTrap(std::vector<Particle> parts);
 
+    // Initialises a trap with default parameters and 'n' particles with 
+    // random positions and velocities
     PenningTrap(int n);
 
-    // Electric and magnetic field at position 'r'
-    const arma::vec3 E_field(arma::vec3 r);
-    const arma::vec3 B_field(arma::vec3 r);
 
-    // Add a particle to the trap
-    void add_particle(Particle p_in);
+    // Add a particle 'p' to the trap
+    void add_particle(Particle p);
 
-    // Counts number of particles in the trap
+    // Counts number of particles within the electric and 
+    // magnetic field of the trap
     const int num_parts_in_trap();
-
-    // Force on particle_i from particle_j
-    const arma::vec3 force_particle(int i, int j);
-
-    // The total force on particle_i from the external fields
-    const arma::vec3 total_force_external(int i);
-
-    // The total force on particle_i from the other particles
-    const arma::vec3 total_force_particles(int i);
-
-    // The total force on particle_i from both external fields and other particles
-    const arma::vec3 total_force(int i, bool interaction);
-
-    // Evolve the system one time step (dt) using Forward Euler
-    void evolve_Euler(double dt, bool interaction = true);
-
-    // Evolve the system one time step (dt) using Runge-Kutta 4th order
-    void evolve_RK4(double dt, bool interaction = true);
 
     // Run the system in 'trap' for time 't'
     int run_experiment(int n, double t, std::string filename, 
                         bool interaction = true, 
                         std::string method = "RK4");
-    
+
+    // Writes the exact solution for a single particle 'p' to file
+    const int exact_sol(int n, double t, Particle p, std::string filename);
+
+private:
+    // Coulomb constant
+    const double k = 1.3893533e5;
+
+    // External magnetic field strength
+    double B0_ = 96.5;
+    // Electric potential field strength
+    double V0_ = 2.41e6;
+    // Characteristic dimension of trap
+    double d_ = 500.;
+
+    // Switch Coulomb interaction between particles 
+    // on ('true') or off ('false')
+    bool interaction = true;
+
+
+    // Returns the external electric and magnetic field 
+    // at position 'r'
+    const arma::vec3 E_field(arma::vec3 r);
+    const arma::vec3 B_field(arma::vec3 r);
+
+    // Returns frequencies for the exact solution of a single particle in the trap
     const double omega_0(Particle p);
     const double omega_z(Particle p);
-
-    // The phases omega_+ and omega_-
+    // The frequencies omega_+ and omega_-
     const double omega_1(Particle p);
     const double omega_2(Particle p);
 
-    const int exact_sol(int n, double t, Particle p, std::string filename);
+
+    // Force on particle 'i' from particle 'j'
+    const arma::vec3 interaction_force(int i, int j);
+    // The total force on particle 'i' from the external fields
+    const arma::vec3 external_force(int i);
+    // The total force on particle 'i' from the other particles
+    const arma::vec3 total_interaction_force(int i);
+    // The total force on particle 'i' from both external fields 
+    // and other particles
+    const arma::vec3 force(int i, bool interaction);
+
+
+    // Evolve the system one time step (dt) using Euler method
+    void evolve_Euler(double dt, bool interaction = true);
+    // Evolve the system one time step (dt) using 
+    // Runge-Kutta 4th order
+    void evolve_RK4(double dt, bool interaction = true);
 
 };
 

@@ -7,13 +7,13 @@
 
 int main()
 {
-    // single_part();
+    single_part();
 
     // two_parts();
 
-    error_sim();
+    // error_sim();
 
-    single_exact();
+    // single_exact();
 
     return 0;
 }
