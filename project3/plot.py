@@ -102,9 +102,7 @@ def max_error(r_num, r_an):
     return np.max(diff)
 
 
-def plot_rel_err(filenames):
-    n_steps = np.array([4000, 8000, 16000, 32000])
-
+def plot_rel_err(n_steps, filenames):
     fig_aspect = 3./2.
     fig_width = 3.5
     fig_height = fig_width*fig_aspect
@@ -112,10 +110,10 @@ def plot_rel_err(filenames):
     fig, ax = plt.subplots(2, 1, figsize=(fig_width,fig_height))
 
     for j in range(2):
-        max_err = np.zeros(4)
-        h = np.zeros(4)
+        max_err = np.zeros(len(n_steps))
+        h = np.zeros(len(n_steps))
 
-        for i in range(4):
+        for i in range(len(n_steps)):
             t = np.loadtxt("data/" + filenames[j] + "_" + str(n_steps[i]) 
                             + "_1.txt", usecols=(0))
             r_num = np.loadtxt("data/" + filenames[j] + "_" + str(n_steps[i]) 
@@ -313,7 +311,17 @@ def plot_two_xyz(filenames):
     fig.savefig("imgs/" + filenames[0] + "_xyz.pdf")
 
 
+def plot_resonance_broad(filename):
+    omega_V = np.loadtxt("data/" + filename + ".txt", usecols=(0))
+    p = np.loadtxt("data/" + filename + ".txt", usecols=(1,2,3))
 
+    fig, ax = plt.subplots()
+
+    # Fix range
+    for i in range(3):
+        ax.plot(omega_V, p[:,i])
+    
+    fig.savefig("imgs/" + filename + ".pdf")
 
 
 def main():
@@ -325,14 +333,14 @@ def main():
 
     # plot_single_xy("singlepart1")
 
-    # # # First plot
+    # # First plot
     # plot_single_tz("singlepart1")
 
     # plot_two_xy("twoparts_int")
     # plot_two_xy("twoparts_noint")
 
-    # # Second plot
-    # plot_two_xy(["twoparts_noint", "twoparts_int"])
+    # Second plot
+    plot_two_xy(["twoparts_noint", "twoparts_int"])
 
     # plot_two_xvx("twoparts_noint")
     # plot_two_xvx("twoparts_int")
@@ -352,7 +360,10 @@ def main():
 
     # plot_single_xy("exact_4000")
 
-    # plot_rel_err(["errorRK4", "errorEuler", "exact_"])
+    # n_steps = np.array([2000, 4000, 6000, 8000, 16000])
+    # plot_rel_err(n_steps, ["errorRK4", "errorEuler", "exact_"])
+
+    plot_resonance_broad("resonance_broad")
 
     return 0
 

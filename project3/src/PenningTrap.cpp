@@ -43,8 +43,8 @@ PenningTrap::PenningTrap(int n, double f, double omega_V, bool interaction)
         r = arma::vec(3).randn() * .1 * d_;
         v = arma::vec(3).randn() * .1 * d_;
 
-        p.set_pos(r);
-        p.set_vel(v);
+        p.r_ = r;
+        p.v_ = v;
 
         parts.push_back(p);
     }
@@ -56,9 +56,12 @@ const arma::vec3 PenningTrap::E_field(arma::vec3 r)
     arma::vec3 E;
 
     double c = V0_/(d_*d_) * (1 + f_ * std::cos(omega_V_ * t_));
+    // double c = V0_/(d_*d_);
+
     E(0) = c * r(0);
     E(1) = c * r(1);
     E(2) = -2. * c * r(2);
+
     return E;
 }
 
@@ -66,6 +69,7 @@ const arma::vec3 PenningTrap::B_field(arma::vec3 r)
 {
     arma::vec3 B(arma::fill::zeros);
     B(2) = B0_;
+
     return B;
 }
 
@@ -83,9 +87,9 @@ const int PenningTrap::num_parts_in_trap()
 
     for (int i = 0; i < n_tot; i++)
     {
-        double r = arma::norm(parts[i].pos());
+        double r = arma::norm(parts[i].r_);
 
-        if (r<d_)
+        if (r < d_)
         {
             n += 1;
         }
@@ -97,13 +101,10 @@ const int PenningTrap::num_parts_in_trap()
 
 const arma::vec3 PenningTrap::interaction_force(int i, int j)
 {
-    Particle p1 = parts[i];
-    Particle p2 = parts[j];
+    arma::vec3 x = parts[i].r_ - parts[j].r_;
 
-    arma::vec3 x = p1.pos() - p2.pos();
-    arma::vec3 F = k * p1.charge() * p2.charge() * x / std::pow(arma::norm(x), 3);
-
-    return F;
+    return k * parts[i].q_ * parts[j].q_ * x 
+            / std::pow(arma::norm(x), 3);
 }
 
 // The total force on particle_i from the external fields
@@ -111,14 +112,10 @@ const arma::vec3 PenningTrap::external_force(int i)
 {
     Particle p = parts[i];
 
-    double r = arma::norm(p.pos());
     arma::vec3 F_ext(arma::fill::zeros);
 
-    if (r < d_)
-    {
-        F_ext = p.charge() * (E_field(p.pos()) 
-                            + arma::cross(p.vel(), B_field(p.pos())));
-    }
+    F_ext = p.q_ * (E_field(p.r_) 
+                            + arma::cross(p.v_, B_field(p.r_)));
 
     return F_ext;
 }
@@ -144,7 +141,12 @@ const arma::vec3 PenningTrap::total_interaction_force(int i)
 // The total force on particle_i from both external fields and other particles
 const arma::vec3 PenningTrap::force(int i)
 {
-    arma::vec3 F_tot = external_force(i);
+    arma::vec3 F_tot(arma::fill::zeros);
+
+    if (arma::norm(parts[i].r_) < d_)
+    {
+        F_tot += external_force(i);
+    }
 
     if (interaction_)
     {
@@ -170,11 +172,11 @@ void PenningTrap::evolve_Euler(double dt)
 
     for (int i = 0; i < n; i++)
     {
-        newpos = old[i].pos() + dt * old[i].vel();
-        newvel = old[i].vel() + dt / old[i].mass() * forces[i];
+        newpos = old[i].r_ + dt * old[i].v_;
+        newvel = old[i].v_ + dt / old[i].m_ * forces[i];
 
-        parts[i].set_pos(newpos);
-        parts[i].set_vel(newvel);
+        parts[i].r_ = newpos;
+        parts[i].v_ = newvel;
     }
 
     t_ += dt;
@@ -191,15 +193,15 @@ void PenningTrap::evolve_RK4(double dt)
     // Find k1
     for (int i = 0; i < n; i++)
     {
-        kx1[i] = dt * parts[i].vel();
-        kv1[i] = dt / parts[i].mass() * force(i);
+        kx1[i] = dt * parts[i].v_;
+        kv1[i] = dt / parts[i].m_ * force(i);
     }
 
     // Set first intermediate position and velocity of all particles
     for (int i = 0; i < n; i++)
     {
-        parts[i].set_pos(copy[i].pos() + kx1[i]/2.);
-        parts[i].set_vel(copy[i].vel() + kv1[i]/2.);
+        parts[i].r_ = copy[i].r_ + .5 * kx1[i];
+        parts[i].v_ = copy[i].v_ + .5 * kv1[i];
     }
 
     t_ += dt/2.;
@@ -207,29 +209,29 @@ void PenningTrap::evolve_RK4(double dt)
     // Find k2
     for (int i = 0; i < n; i++)
     {
-        kx2[i] = dt * parts[i].vel();
-        kv2[i] = dt / parts[i].mass() * force(i);
+        kx2[i] = dt * parts[i].v_;
+        kv2[i] = dt / parts[i].m_ * force(i);
     }
 
     // Set second intermediate position and velocity of all particles
     for (int i = 0; i < n; i++)
     {
-        parts[i].set_pos(copy[i].pos() + kx2[i]/2.);
-        parts[i].set_vel(copy[i].vel() + kv2[i]/2.);
+        parts[i].r_ = copy[i].r_ + .5 * kx2[i];
+        parts[i].v_ = copy[i].v_ + .5 * kv2[i];
     }
 
     // Find k3
     for (int i = 0; i < n; i++)
     {
-        kx3[i] = dt * parts[i].vel();
-        kv3[i] = dt / parts[i].mass() * force(i);
+        kx3[i] = dt * parts[i].v_;
+        kv3[i] = dt / parts[i].m_ * force(i);
     }
 
     // Set third intermediate position and velocity of all particles
     for (int i = 0; i < n; i++)
     {
-        parts[i].set_pos(copy[i].pos() + kx3[i]);
-        parts[i].set_vel(copy[i].vel() + kv3[i]);
+        parts[i].r_ = copy[i].r_ + kx3[i];
+        parts[i].v_ = copy[i].v_ + kv3[i];
     }
 
     t_ += dt/2.;
@@ -237,17 +239,17 @@ void PenningTrap::evolve_RK4(double dt)
     // Find k4
     for (int i = 0; i < n; i++)
     {
-        kx4[i] = dt * parts[i].vel();
-        kv4[i] = dt / parts[i].mass() * force(i);
+        kx4[i] = dt * parts[i].v_;
+        kv4[i] = dt / parts[i].m_ * force(i);
     }
 
     // Set final position and velocity
     for (int i = 0; i < n; i++)
     {
-        parts[i].set_pos(copy[i].pos() 
-                            + (kx1[i] + 2.*(kx2[i]+kx3[i]) + kx4[i]) / 6.);
-        parts[i].set_vel(copy[i].vel() 
-                            + (kv1[i] + 2.*(kv2[i]+kv3[i]) + kv4[i]) / 6.);
+        parts[i].r_ = copy[i].r_ + (kx1[i] + 2.*(kx2[i]+kx3[i]) 
+                        + kx4[i]) / 6.;
+        parts[i].v_ = copy[i].v_ + (kv1[i] + 2.*(kv2[i]+kv3[i]) 
+                        + kv4[i]) / 6.;
     }
 }
 
@@ -276,9 +278,9 @@ int PenningTrap::run_experiment(int n, double t, std::string filename,
         for (int j = 0; j < 3; j++)
         {
             ofile[i] << std::setw(width) << std::setprecision(prec)
-                        << std::scientific << parts[i].pos()(j);
+                        << std::scientific << parts[i].r_(j);
             ofile[i] << std::setw(width) << std::setprecision(prec)
-                        << std::scientific << parts[i].vel()(j);
+                        << std::scientific << parts[i].v_(j);
         }
     }
     for (int i = 0; i < n_parts; i++)
@@ -309,9 +311,9 @@ int PenningTrap::run_experiment(int n, double t, std::string filename,
             for (int j = 0; j < 3; j++)
             {
                 ofile[i] << std::setw(width) << std::setprecision(prec)
-                            << std::scientific << parts[i].pos()(j);
+                            << std::scientific << parts[i].r_(j);
                 ofile[i] << std::setw(width) << std::setprecision(prec)
-                            << std::scientific << parts[i].vel()(j);
+                            << std::scientific << parts[i].v_(j);
             }
             ofile[i] << std::endl;
         }
@@ -328,13 +330,13 @@ int PenningTrap::run_experiment(int n, double t, std::string filename,
 
 const double PenningTrap::omega_0(Particle p)
 {
-    return p.charge() * B0_ / p.mass();
+    return p.q_ * B0_ / p.m_;
 }
 
 
 const double PenningTrap::omega_z(Particle p)
 {
-    return std::sqrt(2. * p.charge()/p.mass() * V0_/(d_*d_));
+    return std::sqrt(2. * p.q_/p.m_ * V0_/(d_*d_));
 }
 
 
@@ -361,9 +363,9 @@ const int PenningTrap::exact_sol(int n, double t_tot, Particle p,
     double w1 = omega_1(p);
     double w2 = omega_2(p);
 
-    double x0 = p.pos()(0);
-    double v0 = p.vel()(1);
-    double z0 = p.pos()(2);
+    double x0 = p.r_(0);
+    double v0 = p.v_(1);
+    double z0 = p.r_(2);
 
     double A1 = (v0 + w2 * x0)/(w1 - w2);
     double A2 = (v0 + w1 * x0)/(w1 - w2);

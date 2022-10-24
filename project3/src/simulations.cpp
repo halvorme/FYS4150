@@ -9,11 +9,8 @@
 #include "Particle.hpp"
 
 
-int single_part()
+int single_part(int n, double t)
 {
-    int n = 4000;
-    double t = 50;
-
     arma::vec3 init_pos = {20, 0, 20};
     arma::vec3 init_vel = {0, 25, 0};
 
@@ -25,16 +22,11 @@ int single_part()
 
     trap.run_experiment(n, t, "data/singlepart");
 
-    std::cout << trap.num_parts_in_trap() << std::endl;
-
     return 0;
 }
 
-int two_parts()
+int two_parts(int n, double t)
 {
-    int n = 4000;
-    double t = 50;
-
     arma::vec3 ipos1 = {20, 0, 20};
     arma::vec3 ivel1 = {0, 25, 0};
 
@@ -54,35 +46,29 @@ int two_parts()
     trap_int.run_experiment(n, t, "data/twoparts_int");
     trap_noint.run_experiment(n, t, "data/twoparts_noint");
 
-    std::cout << trap_int.num_parts_in_trap() << std::endl;
-    std::cout << trap_noint.num_parts_in_trap() << std::endl;
-
     return 0;
 }
 
 
-int error_sim()
+int error_sim(std::vector<int> n, double t)
 {
-    double t = 50.;
-
-    std::vector<int> n{4000, 8000, 16000, 32000};
-
     arma::vec3 r0 = {20 ,0, 20};
     arma::vec3 v0 = {0, 25, 0};
 
     Particle p0(r0, v0);
 
-    std::vector<PenningTrap> traps(8);
+    std::vector<PenningTrap> traps(2*n.size());
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < n.size(); i++)
     {
         traps[i].add_particle(p0);
 
         traps[i].run_experiment(n[i], t, "data/errorRK4_" 
                                 + std::to_string(n[i]) + "_");
 
-        traps[i+4].add_particle(p0);
-        traps[i+4].run_experiment(n[i], t, "data/errorEuler_" 
+        traps[i+n.size()].add_particle(p0);
+
+        traps[i+n.size()].run_experiment(n[i], t, "data/errorEuler_" 
                                     + std::to_string(n[i]) + "_", "Euler");
     }
 
@@ -90,16 +76,8 @@ int error_sim()
 }
 
 
-int single_exact()
+int single_exact(std::vector<int> n, double t)
 {
-    double t = 50.;
-
-    std::vector<int> n{4000, 8000, 16000, 32000};
-    // n[0] = 2000;
-    // n[1] = 8000;
-    // n[2] = 16000;
-    // n[3] = 32000;
-
     arma::vec3 r0 = {20 ,0, 20};
     arma::vec3 v0 = {0, 25, 0};
 
@@ -110,7 +88,7 @@ int single_exact()
 
     std::string filename = "data/exact_";
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < n.size(); i++)
     {
         init_trap.exact_sol(n[i], t, init_trap.parts[0], 
                             filename + std::to_string(n[i]) + ".txt");
@@ -120,12 +98,8 @@ int single_exact()
 }
 
 
-int trapped_broad()
+int trapped_broad(int n, double t)
 {
-    double t = 500.;
-
-    int n = 4000;
-
     std::vector<double> f{.1, .4, .7};
     double d_omega = .02;
     bool interaction = false;
@@ -144,7 +118,7 @@ int trapped_broad()
         std::vector<int> remaining(3);
         omega_V += d_omega;
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < f.size(); i++)
         {
             arma::arma_rng::set_seed(1);
             PenningTrap trap(n_parts, f[i], omega_V, interaction);
@@ -156,14 +130,14 @@ int trapped_broad()
 
         ofile << std::setw(width) << std::setprecision(prec)
                 << std::scientific << omega_V;
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < f.size(); i++)
         {
             ofile << std::setw(width) << std::setprecision(prec)
                 << std::scientific << remaining[i];
         }
         ofile << std::endl;
 
-        std::cout << "Yo man" << std::endl;
+        std::cout << omega_V << std::endl;
     }
 
     ofile.close();

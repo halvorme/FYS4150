@@ -24,14 +24,14 @@ public:
     void set_pos(arma::vec3 r);
     void set_vel(arma::vec3 v);
 
-private:
+
     // Charge and mass of particle
     double q_ = 1.;
     double m_ = 40.;
-
     // Position and velocity of particle
     arma::vec3 r_ = arma::vec3(arma::fill::zeros);
     arma::vec3 v_ = arma::vec3(arma::fill::zeros);
+
 };
 
 #endif
