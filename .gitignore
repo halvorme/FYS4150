@@ -7,6 +7,7 @@ lectures2015.pdf
 
 .DS_Store
 .vscode
+gmon.out
 
 *.exe
 *.o
