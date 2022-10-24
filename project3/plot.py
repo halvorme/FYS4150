@@ -128,7 +128,7 @@ def plot_rel_err(filenames):
             max_err[i] = max_error(r_num, r_an)
             h[i] = t[-1]/n_steps[i]
 
-            ax[j].semilogy(t, rel_err, label=f'$n = {i}$')
+            ax[j].semilogy(t, rel_err, label=f'$n = {n_steps[i]}$')
 
         ax[j].set_xlabel(r'$t$ (\textmu s)')
         ax[j].set_ylabel(r'Relative error')
@@ -323,9 +323,9 @@ def main():
     plt.rcParams.update({'lines.linewidth': 1., 'axes.grid': True, 'grid.linewidth': 0.5})
     plt.rcParams.update({'figure.autolayout': True})
 
-    plot_single_xy("singlepart1")
+    # plot_single_xy("singlepart1")
 
-    # # First plot
+    # # # First plot
     # plot_single_tz("singlepart1")
 
     # plot_two_xy("twoparts_int")

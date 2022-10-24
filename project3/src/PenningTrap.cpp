@@ -32,8 +32,8 @@ PenningTrap::PenningTrap(bool interaction)
 {}
 
 // Initiates a Penning trap with 'n' particles, with random positions and velocities
-PenningTrap::PenningTrap(int n, bool interaction)
-    : interaction_(interaction)
+PenningTrap::PenningTrap(int n, double f, double omega_V, bool interaction)
+    : f_(f), omega_V_(omega_V), interaction_(interaction)
 {
     arma::vec3 r, v;
     Particle p;
@@ -54,9 +54,11 @@ PenningTrap::PenningTrap(int n, bool interaction)
 const arma::vec3 PenningTrap::E_field(arma::vec3 r)
 {
     arma::vec3 E;
-    E(0) = V0_/(d_*d_)*r(0);
-    E(1) = V0_/(d_*d_)*r(1);
-    E(2) = -2.*V0_/(d_*d_)*r(2);
+
+    double c = V0_/(d_*d_) * (1 + f_ * std::cos(omega_V_ * t_));
+    E(0) = c * r(0);
+    E(1) = c * r(1);
+    E(2) = -2. * c * r(2);
     return E;
 }
 
@@ -174,6 +176,8 @@ void PenningTrap::evolve_Euler(double dt)
         parts[i].set_pos(newpos);
         parts[i].set_vel(newvel);
     }
+
+    t_ += dt;
 }
 
 // Evolve the system one time step (dt) using Runge-Kutta 4th order
@@ -197,6 +201,8 @@ void PenningTrap::evolve_RK4(double dt)
         parts[i].set_pos(copy[i].pos() + kx1[i]/2.);
         parts[i].set_vel(copy[i].vel() + kv1[i]/2.);
     }
+
+    t_ += dt/2.;
 
     // Find k2
     for (int i = 0; i < n; i++)
@@ -226,6 +232,8 @@ void PenningTrap::evolve_RK4(double dt)
         parts[i].set_vel(copy[i].vel() + kv3[i]);
     }
 
+    t_ += dt/2.;
+
     // Find k4
     for (int i = 0; i < n; i++)
     {
@@ -242,6 +250,7 @@ void PenningTrap::evolve_RK4(double dt)
                             + (kv1[i] + 2.*(kv2[i]+kv3[i]) + kv4[i]) / 6.);
     }
 }
+
 
 // Run the system in 'trap' for time 't'
 int PenningTrap::run_experiment(int n, double t, std::string filename,
@@ -263,7 +272,7 @@ int PenningTrap::run_experiment(int n, double t, std::string filename,
     for (int i = 0; i < n_parts; i++)
     {
         ofile[i] << std::setw(width) << std::setprecision(prec)
-                    << std::scientific << 0.;
+                    << std::scientific << t_;
         for (int j = 0; j < 3; j++)
         {
             ofile[i] << std::setw(width) << std::setprecision(prec)
@@ -296,7 +305,7 @@ int PenningTrap::run_experiment(int n, double t, std::string filename,
         for (int i = 0; i < n_parts; i++)
         {
             ofile[i] << std::setw(width) << std::setprecision(prec)
-                        << std::scientific << (m+1)*dt;
+                        << std::scientific << t_;
             for (int j = 0; j < 3; j++)
             {
                 ofile[i] << std::setw(width) << std::setprecision(prec)
@@ -393,3 +402,40 @@ const int PenningTrap::exact_sol(int n, double t_tot, Particle p,
     return 0;
 }
 
+
+int PenningTrap::run_experiment_noprint(int n, double t, std::string method)
+{
+    double dt = t/n;
+
+    if (method != "RK4" && method != "Euler")
+    {
+        std::cout << "Error: No method called " << method << std::endl;
+        return 1;
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        if (method == "RK4")
+        {
+            evolve_RK4(dt);
+        }
+        else if (method == "Euler")
+        {
+            evolve_Euler(dt);
+        }
+    }
+
+    return 0;
+}
+
+int PenningTrap::run_experiment_noprint_test(int n, double t)
+{
+    double dt = t/n;
+
+    for (int i = 0; i < n; i++)
+    {
+        evolve_RK4(dt);
+    }
+
+    return 0;
+}

@@ -31,7 +31,7 @@ public:
 
     // Initialises a trap with default parameters and 'n' particles with 
     // random positions and velocities
-    PenningTrap(int n, bool interaction);
+    PenningTrap(int n, double f, double omega_V, bool interaction);
 
 
     // Add a particle 'p' to the trap
@@ -49,6 +49,9 @@ public:
     const int exact_sol(int n, double t, Particle p, 
                         std::string filename);
 
+    int run_experiment_noprint(int n, double t, std::string method);
+    int run_experiment_noprint_test(int n, double t);
+
 private:
     // Coulomb constant
     const double k = 1.3893533e5;
@@ -59,6 +62,10 @@ private:
     double V0_ = 2.41e6;
     // Characteristic dimension of trap
     double d_ = 500.;
+
+    double f_ = 0.;
+    double omega_V_ = 1.;
+    double t_ = 0.;
 
     // Switch Coulomb interaction between particles 
     // on ('true') or off ('false')

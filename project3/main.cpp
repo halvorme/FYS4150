@@ -7,13 +7,15 @@
 
 int main()
 {
-    single_part();
+    // single_part();
 
     // two_parts();
 
     // error_sim();
 
     // single_exact();
+
+    trapped_broad();
 
     return 0;
 }

@@ -14,4 +14,6 @@ int error_sim();
 
 int single_exact();
 
+int trapped_broad();
+
 #endif
