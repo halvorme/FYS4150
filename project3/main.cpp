@@ -28,7 +28,7 @@ int main()
     n = 500.;
     t = 50.;
 
-    trapped_broad_new(n, t);
+    resonance_search(n, t);
 
     return 0;
 }

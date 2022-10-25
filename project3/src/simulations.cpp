@@ -98,7 +98,49 @@ int single_exact(std::vector<int> n, double t)
 }
 
 
-int search(int n, double t, int n_parts, double omega_low, double omega_up, 
+int resonance_search(int n, double t)
+{
+    std::vector<double> f{.1, .4, .7};
+    double d_omega = .04;
+    bool interaction = false;
+    int n_parts = 100;
+
+    double omega_low = 0.;
+    double omega_up = 3.;
+
+    std::ofstream ofile;
+    ofile.open("data/resonance_broad_" + std::to_string(int(t)) + "_" 
+                + std::to_string(n) +".txt");
+
+    omega_scan(n, t, n_parts, omega_low, omega_up, d_omega, f, interaction, ofile);
+
+    ofile.close();
+
+    return 0;
+}
+
+
+int resonance_analysis(int n, double t, double omega_low, double omega_up, bool interaction)
+{
+    std::vector<double> f{.1, .4, .7};
+    double d_omega = .02;
+    int n_parts = 100;
+
+    std::ofstream ofile;
+    ofile.open("data/resonance_analysis_" + std::to_string(int(t)) + "_" 
+                + std::to_string(n) + std::to_string(interaction) +".txt");
+
+    omega_scan(n, t, n_parts, omega_low, omega_up, d_omega, f, interaction, ofile);
+
+    ofile.close();
+
+    return 0;
+
+    return 0;
+}
+
+
+int omega_scan(int n, double t, int n_parts, double omega_low, double omega_up, 
             double d_omega, std::vector<double> f, bool interaction, 
             std::ofstream& ofile)
 {
@@ -133,33 +175,5 @@ int search(int n, double t, int n_parts, double omega_low, double omega_up,
         std::cout << omega_V << std::endl;
     }
 
-    return 0;
-}
-
-
-int trapped_broad_new(int n, double t)
-{
-    std::vector<double> f{.1, .4, .7};
-    double d_omega = .02;
-    bool interaction = false;
-    int n_parts = 100;
-
-    double omega_low = 0.;
-    double omega_up = 2.5;
-
-    std::ofstream ofile;
-    ofile.open("data/resonance_broad_" + std::to_string(int(t)) + "_" 
-                + std::to_string(n) +".txt");
-
-    search(n, t, n_parts, omega_low, omega_up, d_omega, f, interaction, ofile);
-
-    ofile.close();
-
-    return 0;
-}
-
-
-int resonance(int n, double t, double omega_low, double omega_up, bool interction)
-{
     return 0;
 }
