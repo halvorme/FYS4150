@@ -59,7 +59,9 @@ int error_sim(std::vector<int> n, double t)
 
     std::vector<PenningTrap> traps(2*n.size());
 
-    for (int i = 0; i < n.size(); i++)
+    int n_len = n.size();
+
+    for (int i = 0; i < n_len; i++)
     {
         traps[i].add_particle(p0);
 
@@ -86,9 +88,11 @@ int single_exact(std::vector<int> n, double t)
 
     init_trap.add_particle(p);
 
+    int n_len = n.size();
+
     std::string filename = "data/exact_";
 
-    for (int i = 0; i < n.size(); i++)
+    for (int i = 0; i < n_len; i++)
     {
         init_trap.exact_sol(n[i], t, init_trap.parts[0], 
                             filename + std::to_string(n[i]) + ".txt");
@@ -146,6 +150,8 @@ int omega_scan(int n, double t, int n_parts, double omega_low, double omega_up,
 {
     double omega_V = omega_low;
 
+    int f_len = f.size();
+
     int prec = 4;
     int width = prec + 10;
 
@@ -154,7 +160,7 @@ int omega_scan(int n, double t, int n_parts, double omega_low, double omega_up,
         std::vector<double> frac_remaining(3);
         omega_V += d_omega;
 
-        for (int i = 0; i < f.size(); i++)
+        for (int i = 0; i < f_len; i++)
         {
             arma::arma_rng::set_seed(1);
             PenningTrap trap(n_parts, f[i], omega_V, interaction);
@@ -166,7 +172,7 @@ int omega_scan(int n, double t, int n_parts, double omega_low, double omega_up,
 
         ofile << std::setw(width) << std::setprecision(prec)
                 << std::scientific << omega_V;
-        for (int i = 0; i < f.size(); i++)
+        for (int i = 0; i < f_len; i++)
         {
             ofile << std::setw(width) << frac_remaining[i];
         }
