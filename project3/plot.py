@@ -339,8 +339,8 @@ def main():
     # plot_two_xy("twoparts_int")
     # plot_two_xy("twoparts_noint")
 
-    # Second plot
-    plot_two_xy(["twoparts_noint", "twoparts_int"])
+    # # Second plot
+    # plot_two_xy(["twoparts_noint", "twoparts_int"])
 
     # plot_two_xvx("twoparts_noint")
     # plot_two_xvx("twoparts_int")
@@ -360,10 +360,10 @@ def main():
 
     # plot_single_xy("exact_4000")
 
-    # n_steps = np.array([2000, 4000, 6000, 8000, 16000])
+    # n_steps = np.array([2000, 5000, 8000, 10000, 20000, 40000, 50000])
     # plot_rel_err(n_steps, ["errorRK4", "errorEuler", "exact_"])
 
-    plot_resonance_broad("resonance_broad")
+    plot_resonance_broad("resonance_broad_500_5000")
 
     return 0
 

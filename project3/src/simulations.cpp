@@ -98,24 +98,18 @@ int single_exact(std::vector<int> n, double t)
 }
 
 
-int trapped_broad(int n, double t)
+int search(int n, double t, int n_parts, double omega_low, double omega_up, 
+            double d_omega, std::vector<double> f, bool interaction, 
+            std::ofstream& ofile)
 {
-    std::vector<double> f{.1, .4, .7};
-    double d_omega = .02;
-    bool interaction = false;
-    int n_parts = 100;
+    double omega_V = omega_low;
 
-    double omega_V = 0;
-
-    std::ofstream ofile;
-    ofile.open("data/resonance_broad.txt");
-
-    int prec = 14;
+    int prec = 4;
     int width = prec + 10;
 
-    while (omega_V <= 2.5)
+    while (omega_V <= omega_up)
     {
-        std::vector<int> remaining(3);
+        std::vector<double> frac_remaining(3);
         omega_V += d_omega;
 
         for (int i = 0; i < f.size(); i++)
@@ -125,23 +119,47 @@ int trapped_broad(int n, double t)
 
             trap.run_experiment_noprint_test(n, t);
 
-            remaining[i] = trap.num_parts_in_trap();
+            frac_remaining[i] = trap.num_parts_in_trap()/double(n_parts);
         }
 
         ofile << std::setw(width) << std::setprecision(prec)
                 << std::scientific << omega_V;
         for (int i = 0; i < f.size(); i++)
         {
-            ofile << std::setw(width) << std::setprecision(prec)
-                << std::scientific << remaining[i];
+            ofile << std::setw(width) << frac_remaining[i];
         }
         ofile << std::endl;
 
         std::cout << omega_V << std::endl;
     }
 
+    return 0;
+}
+
+
+int trapped_broad_new(int n, double t)
+{
+    std::vector<double> f{.1, .4, .7};
+    double d_omega = .02;
+    bool interaction = false;
+    int n_parts = 100;
+
+    double omega_low = 0.;
+    double omega_up = 2.5;
+
+    std::ofstream ofile;
+    ofile.open("data/resonance_broad_" + std::to_string(int(t)) + "_" 
+                + std::to_string(n) +".txt");
+
+    search(n, t, n_parts, omega_low, omega_up, d_omega, f, interaction, ofile);
+
     ofile.close();
 
     return 0;
+}
 
+
+int resonance(int n, double t, double omega_low, double omega_up, bool interction)
+{
+    return 0;
 }
