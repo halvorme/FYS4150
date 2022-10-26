@@ -105,12 +105,12 @@ int single_exact(std::vector<int> n, double t)
 int resonance_search(int n, double t)
 {
     std::vector<double> f{.1, .4, .7};
-    double d_omega = .04;
+    double d_omega = .02;
     bool interaction = false;
     int n_parts = 100;
 
     double omega_low = 0.;
-    double omega_up = 3.;
+    double omega_up = 2.5;
 
     std::ofstream ofile;
     ofile.open("data/resonance_broad_" + std::to_string(int(t)) + "_" 
@@ -127,12 +127,12 @@ int resonance_search(int n, double t)
 int resonance_analysis(int n, double t, double omega_low, double omega_up, bool interaction)
 {
     std::vector<double> f{.1, .4, .7};
-    double d_omega = .02;
-    int n_parts = 100;
+    double d_omega = .001;
+    int n_parts = 30;
 
     std::ofstream ofile;
     ofile.open("data/resonance_analysis_" + std::to_string(int(t)) + "_" 
-                + std::to_string(n) + std::to_string(interaction) +".txt");
+                + std::to_string(n) + "_" + std::to_string(interaction) +".txt");
 
     omega_scan(n, t, n_parts, omega_low, omega_up, d_omega, f, interaction, ofile);
 

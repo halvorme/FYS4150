@@ -191,8 +191,8 @@ def plot_two_rvr(filenames):
         ax[i].plot(r1, vr1, 'k', label=r'$p_1$')
         ax[i].plot(r2, vr2, 'r', label=r'$p_2$')
 
-        ax[i].set_xlabel(r'$r$ (\textmu m)')
-        ax[i].set_ylabel(r'$v_r$ (\textmu m/\textmu s)')
+        ax[i].set_xlabel(r'$\rho$ (\textmu m)')
+        ax[i].set_ylabel(r'$v_\rho$ (\textmu m/\textmu s)')
 
         ax[i].legend()
 
@@ -311,16 +311,25 @@ def plot_two_xyz(filenames):
     fig.savefig("imgs/" + filenames[0] + "_xyz.pdf")
 
 
-def plot_resonance_broad(filename):
+def plot_resonance(filename):
     omega_V = np.loadtxt("data/" + filename + ".txt", usecols=(0))
     p = np.loadtxt("data/" + filename + ".txt", usecols=(1,2,3))
+
+    f = np.array([.1, .4, .7])
 
     fig, ax = plt.subplots()
 
     # Fix range
     for i in range(3):
-        ax.plot(omega_V, p[:,i])
+        ax.plot(omega_V, p[:,i], label=f'$f = {f[i]}$')
     
+    ax.set_xlabel(r'$\omega_V$ (MHz)')
+    ax.set_ylabel(r'$N/N_0$')
+    # ax.set_ylabel(r'Fraction of remaining particles')
+
+    ax.grid()
+    ax.legend()
+
     fig.savefig("imgs/" + filename + ".pdf")
 
 
@@ -361,9 +370,12 @@ def main():
     # plot_single_xy("exact_4000")
 
     # n_steps = np.array([2000, 5000, 8000, 10000, 20000, 40000, 50000])
-    # plot_rel_err(n_steps, ["errorRK4", "errorEuler", "exact_"])
+    n_steps = np.array([4000, 8000, 16000, 32000])
+    plot_rel_err(n_steps, ["errorRK4", "errorEuler", "exact_"])
 
-    plot_resonance_broad("resonance_broad_500_5000")
+    # plot_resonance("resonance_broad_500_5000")
+
+    # plot_resonance("resonance_analysis_50_500_0")
 
     return 0
 
